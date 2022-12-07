@@ -45,14 +45,15 @@ ggraph(example1_network, layout = "manual",
                  start_cap = circle(4, 'lines'),
                  end_cap = circle(4, 'lines')) +
   theme_void()  
-ggsave("./EP_Cox_Nomo/Pentose_1.svg", height = 2, width = 6.5, bg = "white")
-ggsave("./EP_Cox_Nomo/Pentose_1.png", height = 2, width = 6.5, bg = "white")
+ggsave("./EP_Cox_Nomo/ggpathway/Pentose_1.svg", height = 2, width = 6.5, bg = "white")
+ggsave("./EP_Cox_Nomo/ggpathway/Pentose_1.png", height = 2, width = 6.5, bg = "white")
 
 ###################
 # 绘制PPP代谢途径
 # 导入数据
-example2_edges <- read_excel("./EP_Cox_Nomo/OPPP_edges.xlsx")
-example2_nodes <- read_excel("./EP_Cox_Nomo/OPPP_nodes.xlsx")
+getwd()
+example2_edges <- read_excel("./EP_Cox_Nomo/ggpathway/OPPP_edges.xlsx")
+example2_nodes <- read_excel("./EP_Cox_Nomo/ggpathway/OPPP_nodes.xlsx")
 
 # 构建新标签
 example2_nodes <- example2_nodes %>% 
@@ -75,7 +76,7 @@ ggraph(example2_network, layout = "kk") +
   scale_fill_manual(values = carto_pal(7, "Vivid")) +
   labs(fill = "Carbons") +
   theme_void()  
-
+ggsave("./EP_Cox_Nomo/ggpathway/PPP_1.png", height = 2, width = 6.5, bg = "white")
 ###################
 # TCA途径
 # 导入数据
