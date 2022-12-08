@@ -2,6 +2,7 @@
 # Lasso, Ridge, Enet, StepCox, SurvivalSVM, CoxBoost, SuperPC, plsRcox, RSF, GBM(https://mp.weixin.qq.com/s?__biz=MzAwMjY4MDE2Mg==&mid=2247619851&idx=1&sn=2df8ba1c261dab389f630eeea91d1040&chksm=9ac5e106adb26810faecd8195976fc3910886079c926c3569865255936b2d4dc27b1bc8ed3d2&mpshare=1&scene=1&srcid=1123lWmWuQAxJ26m48HGkQQz&sharer_sharetime=1669216079860&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
 library(glmnet)
 library(mlr3)
+library(mlr3verse) # lrn()函数生存分析机器学习算法汇总
 
 # 1.Lasso
 # 代码解析
