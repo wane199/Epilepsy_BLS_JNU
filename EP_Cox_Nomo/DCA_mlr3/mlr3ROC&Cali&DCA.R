@@ -55,15 +55,18 @@ print(Bor.train)
 boruta.df <- attStats(Bor.train)
 class(boruta.df)
 print(boruta.df)
-write.csv(boruta.df,'C:\\Users\\wane199\\Desktop\\EP\\REFER\\BLS\\KAI\\boruta_import.csv')
+write.csv(boruta.df, "C:\\Users\\wane199\\Desktop\\EP\\REFER\\BLS\\KAI\\boruta_import.csv")
 
 plot(Bor.train, xlab = "", xaxt = "n") # Shows important bands
-lz<-lapply(1:ncol(Bor.train$ImpHistory),function(i)
-          Bor.train$ImpHistory[is.finite(Bor.train$ImpHistory[,i]),i])
+lz <- lapply(1:ncol(Bor.train$ImpHistory), function(i) {
+  Bor.train$ImpHistory[is.finite(Bor.train$ImpHistory[, i]), i]
+})
 names(lz) <- colnames(Bor.train$ImpHistory)
-Labels <- sort(sapply(lz,median))
-axis(side = 1,las=2,labels = names(Labels),
-     at = 1:ncol(Bor.train$ImpHistory), cex.axis = 0.7)
+Labels <- sort(sapply(lz, median))
+axis(
+  side = 1, las = 2, labels = names(Labels),
+  at = 1:ncol(Bor.train$ImpHistory), cex.axis = 0.7
+)
 
 plot(Bor.train, sort = FALSE)
 plotImpHistory(Bor.train)
@@ -89,21 +92,25 @@ df_rf$importance
 df_rf$p
 # 随机森林分析与可视化
 library(linkET)
-correlate(train) %>% 
-    qcorrplot(type = "lower") +
-    geom_square() +
-    scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu"))
+correlate(train) %>%
+  qcorrplot(type = "lower") +
+  geom_square() +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu"))
 qpairs(train) + geom_pairs(base_size = 2) # pairs plot
-correlate(train[-1]) %>% 
-  as.igraph() %>% 
+correlate(train[-1]) %>%
+  as.igraph() %>%
   plot(layout = layout_with_circular) # network
 
-p <- correlate(train[1], train[-1]) %>% 
-  qcorrplot(extra_mat = list(importance = df_rf$importance),
-            fixed = FALSE) +
+p <- correlate(train[1], train[-1]) %>%
+  qcorrplot(
+    extra_mat = list(importance = df_rf$importance),
+    fixed = FALSE
+  ) +
   geom_tile(colour = "grey80", size = 0.25) +
-  geom_point(aes(size = importance), fill = NA, shape = 21,
-             data = function(data) data[data$pvalue < 0.05, , drop = FALSE]) +
+  geom_point(aes(size = importance),
+    fill = NA, shape = 21,
+    data = function(data) data[data$pvalue < 0.05, , drop = FALSE]
+  ) +
   scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu"))
 
 df_rf$explained
@@ -112,9 +119,11 @@ p2 <- ggplot(df_rf$explained, aes(df_rf$explained, df_rf$name)) +
   geom_col(fill = "steelblue") +
   scale_y_discrete(limits = rev(names(train[1]))) +
   theme_bw() +
-  theme(axis.text.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.title.y = element_blank())
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.title.y = element_blank()
+  )
 p2
 # 训练集的C-index,敏感度，特异度，阴性预测值，阳性预测值，准确度等
 p1 <- predict(df_rf, train)
@@ -124,7 +133,7 @@ p2 <- predict(df_rf, test)
 confusionMatrix(p2, factor(test$oneyr))
 
 library(reportROC)
-reportROC(gold=factor(test$oneyr), predictor.binary=p2)
+reportROC(gold = factor(test$oneyr), predictor.binary = p2)
 library(DescTools)
 BrierScore(df_rf)
 
@@ -176,8 +185,10 @@ plot(testroc,
   grid.col = c("green", "red")
 )
 
-model <- riskRegression::Score(list("full" = df_rf), formula = oneyr ~ 1,  data = test, plots = "roc",
-                               metrics = "auc")
+model <- riskRegression::Score(list("full" = df_rf),
+  formula = oneyr ~ 1, data = test, plots = "roc",
+  metrics = "auc"
+)
 plotROC(model)
 
 # 获取预测数据并整理数据, DCA & CIC 曲线绘制
@@ -203,7 +214,8 @@ ggplot(temp, aes(x = threshold, y = value, colour = variable)) +
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    legend.title = element_blank())
+    legend.title = element_blank()
+  )
 
 # DCA & CIC
 library(rmda)
@@ -211,60 +223,64 @@ library(ggDCA)
 library(rms)
 d <- dca(df_rf)
 ggplot(d)
-ggplot(d,color=FALSE)
-ggplot(d,linetype = FALSE)
-rfp=rFP.p100(x=d) # Calculate reduction in false positive count
+ggplot(d, color = FALSE)
+ggplot(d, linetype = FALSE)
+rfp <- rFP.p100(x = d) # Calculate reduction in false positive count
 ggplot(rfp)
 AUDC(d) # Area under Decision Curve
 range(d) # Ranges for net benefit
 
 
 ## 尽管文章中没有展示，我们也可以探索一下calibration plot
-p2=as.numeric(p2)
+p2 <- as.numeric(p2)
 cal1 <- calibration(as.factor(oneyr) ~ p2, data = test)
 # cal2 <- calibration(as.factor(c) ~ d, data = r2)
 xyplot(cal1)
 # xyplot(cal2)
 # 绘制预测模型的校准曲线
 library(riskRegression)
-xb <- Score(list(model1 = df_rf), oneyr ~ 1, 
-            data = test,
-            plots="cal")
+xb <- Score(list(model1 = df_rf), oneyr ~ 1,
+  data = test,
+  plots = "cal"
+)
 # 绘制校准曲线使用riskRegression包的plotCalibration()函数。
 # 或者使用pec包深度验证Cox模型：pec包函数和rms包中的calibrate()函数原理一致
-plotCalibration(xb, brier.in.legend=TRUE) # 显示AUC和Brier score
+plotCalibration(xb, brier.in.legend = TRUE) # 显示AUC和Brier score
 # 上面的模型的校准曲线使用的是曲线形式，还可以使用条形图的形式来表示。
-plotCalibration(xb, bars=TRUE, model="model1")
-plotCalibration(xb, 
-                model="model1", # 绘制模型1的校准曲线
-                bars=TRUE,  # 校准曲线为条形图形式
-                show.frequencies = TRUE, # 条形图上显示频率
-                xlab = "", # x轴标签
-                ylab = "", # y轴标签
-                col = c("#ca3e47","#1ee3cf"), # 设置条形图的颜色
-                names.cex = 1.0, # X轴数字的缩放倍数
-                cex = 1.5) # 设置图例和标签的缩放倍数
+plotCalibration(xb, bars = TRUE, model = "model1")
+plotCalibration(xb,
+  model = "model1", # 绘制模型1的校准曲线
+  bars = TRUE, # 校准曲线为条形图形式
+  show.frequencies = TRUE, # 条形图上显示频率
+  xlab = "", # x轴标签
+  ylab = "", # y轴标签
+  col = c("#ca3e47", "#1ee3cf"), # 设置条形图的颜色
+  names.cex = 1.0, # X轴数字的缩放倍数
+  cex = 1.5
+) # 设置图例和标签的缩放倍数
 
 ## 其实前面的步骤基本上都是基本建模的流程，绘制DCA只需要两类数据，一个是结局的编码（这里我们需要我们的编码是二分类并且是0和1的形式），然后我们需要提供我们机器学习模型预测阳性结局的概率
 ## 注意，由于随机森林等机器学习算法给出来的预测是0或者1，而非连续性的概率，所以calibration，DCA等分析方法并不十分适合(需要概率)
 
 # mlr3体系完成机器学习模型的构建并进行DCA的绘制
 # 建立任务
-dt <- dt0[c(-1,-3)] #获取数据
-dt$oneyr #查看阳性结局
-ep_task <- as_task_classif(dt, 'ID', target="oneyr", positive = "1")
-train_set <- sample(ep_task$nrow,0.7*ep_task$nrow)#划分训练集
-test_set <- setdiff(seq_len(ep_task$nrow),train_set)#划分测试集
+dt <- dt0[c(-1, -3)] # 获取数据
+dt$oneyr # 查看阳性结局
+ep_task <- as_task_classif(dt, "ID", target = "oneyr", positive = "1")
+train_set <- sample(ep_task$nrow, 0.7 * ep_task$nrow) # 划分训练集
+test_set <- setdiff(seq_len(ep_task$nrow), train_set) # 划分测试集
 
-lrn <- lrn("classif.ranger",predict_type = "prob")#选择随机森林学习器
-lrn$train(ep_task, row_ids = train_set)#拟合模型
-pred <- lrn$predict(ep_task,row_ids = test_set)#预测
+lrn <- lrn("classif.ranger", predict_type = "prob") # 选择随机森林学习器
+lrn$train(ep_task, row_ids = train_set) # 拟合模型
+pred <- lrn$predict(ep_task, row_ids = test_set) # 预测
 pred
-outcome <- ifelse(pred$truth == "1",1,0)
-prob <- data.frame("outcome" = outcome, "rf_prob" = pred$prob[,1])
-dcaoutput <- dca(data = prob, outcome = "outcome", 
-                 predictors = c("rf_prob"),
-                 xstart = 0, xstop = 1, ymin = 0)
+outcome <- ifelse(pred$truth == "1", 1, 0)
+prob <- data.frame("outcome" = outcome, "rf_prob" = pred$prob[, 1])
+dcaoutput <- dca(
+  data = prob, outcome = "outcome",
+  predictors = c("rf_prob"),
+  xstart = 0, xstop = 1, ymin = 0
+)
 
 ####################################################
 ####################################################
@@ -315,5 +331,3 @@ plot.survival(rad.obj, plots.one.page = F)
 which.min(rad.obj$err.rate)
 rad.pred <- predict(rad.obj, test)
 print(rad.pred)
-
-
