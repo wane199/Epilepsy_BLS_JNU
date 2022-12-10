@@ -1,5 +1,6 @@
 # binomial classification nomogram-LR
 rm(list = ls())
+library(rms)
 options(digits=3) # 限定输出小数点后数字的位数为3位
 dt <- read.csv("C:/Users/wane199/Desktop/EP/REFER/BLS/KAI/process_rad_lat_7.csv")
 dt <- read.csv("/home/wane/Desktop/EP/REFER/BLS/KAI/process_rad_lat_7.csv")
@@ -21,9 +22,9 @@ test <- test[c(-1:-2,-3)]
 
 train$Y <- factor(train$Y)
 # 拟合模型
-fit1 <- glm(Y ~ original_gldm_DependenceEntropy+log.sigma.5.0.mm.3D_firstorder_Energy+wavelet.LHL_glrlm_GrayLevelNonUniformity, # original_gldm_DependenceEntropy+log.sigma.5.0.mm.3D_firstorder_Energy+log.sigma.5.0.mm.3D_firstorder_Mean+wavelet.LHL_glrlm_GrayLevelNonUniformity
+fit1 <- glm(Y ~ ., # original_gldm_DependenceEntropy+log.sigma.5.0.mm.3D_firstorder_Energy+wavelet.LHL_glrlm_GrayLevelNonUniformity
             data = train, family = "binomial")
-fit2 <- step(fit1)
+fit2 <- step(fit1) # Choose a model by AIC in a Stepwise Algorithm
 summary(fit2)
 1 / exp(coef(fit2))
 # logit P 计算
@@ -39,10 +40,23 @@ Ca1 <- val.prob(P2, train$Y, m = m, cex = 0.8) # 预测概率与真实值进行�
 # logit P 计算
 pred.logit3 <- predict(fit2, newdata = test)
 # 预测概率P
-P3 <- predict(fit1, type = "response", newdata = test)
+P3 <- predict(fit2, type = "response", newdata = test)
 m <- NROW(test) / 5
 Ca1 <- val.prob(P3, test$Y, m = m, cex = 0.8) 
 # 预测概率与真实值进行矫正
+# 校准曲线
+library(riskRegression)
+xb=Score(list(model=fit2),Y~1,data=train,
+         plots="cal")
+plotCalibration(xb,brier.in.legend=TRUE)
+plotCalibration(xb,bars=TRUE,model="model",show.frequencies = T)
+plotCalibration(xb,models=1,bars=TRUE,names.cex=1.3)
+# 验证集
+xb2=Score(list(model=fit2),Y~1,data=test,
+         plots="cal")
+plotCalibration(xb2,brier.in.legend=TRUE)
+plotCalibration(xb2,bars=TRUE,model="model",show.frequencies = T)
+plotCalibration(xb2,models=1,bars=TRUE,names.cex=1.3)
 
 paste0(colnames(train),collapse = "+")
 str(train)
