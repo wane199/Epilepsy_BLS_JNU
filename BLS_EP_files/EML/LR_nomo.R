@@ -2,6 +2,8 @@
 rm(list = ls())
 library(rms)
 options(digits = 3) # 限定输出小数点后数字的位数为3位
+options("scipen"=100, "digits"=4)
+
 dt <- read.csv("C:/Users/wane199/Desktop/EP/REFER/BLS/KAI/process_rad_lat_7.csv")
 dt <- read.csv("/home/wane/Desktop/EP/REFER/BLS/KAI/process_rad_lat_7.csv")
 str(dt) ## 查看每个变量结构
@@ -31,12 +33,15 @@ library(autoReg) # 自动输出整洁的回归模型结果
 autoReg(fit1)
 result <- autoReg(fit2, uni = T, multi = T, final = T)
 write.csv(result,"/home/wane/Desktop/EP/REFER/BLS/KAI/step_LR.csv", row.names = F)
+library(forplo)
+forplo(fit2)
+forplo(fit2, sort = T, left.align = T, ci.edge = T, scaledot.by = abs(coef(fit2)), 
+       col = '#DBA39A', char = 15, shade.every = 1, shade.col = '#FDF0E0', shade.alpha = 0.8, right.bar = T, rightbar.ticks = T, leftbar.ticks = T)
 1 / exp(coef(fit2))
 # logit P 计算
 pred.logit2 <- predict(fit2)
 # 预测概率P
 P2 <- predict(fit2, type = "response")
-
 m <- NROW(train) / 5
 m
 Ca1 <- val.prob(P2, train$Y, m = m, cex = 0.8) # 预测概率与真实值进行矫正
@@ -55,9 +60,10 @@ xb <- Score(list(model = fit2), Y ~ 1,
   data = train,
   plots = "cal"
 )
-plotCalibration(xb, brier.in.legend = TRUE)
+par(mfrow=c(2,2))
+plotCalibration(xb, brier.in.legend = TRUE, title = 'Training set', main = 'Training set')
 plotCalibration(xb, bars = TRUE, model = "model", show.frequencies = T)
-plotCalibration(xb, models = 1, bars = TRUE, names.cex = 1.3)
+# plotCalibration(xb, models = 1, bars = TRUE, names.cex = 1.3)
 # 验证集
 xb2 <- Score(list(model = fit2), Y ~ 1,
   data = test,
@@ -65,7 +71,7 @@ xb2 <- Score(list(model = fit2), Y ~ 1,
 )
 plotCalibration(xb2, brier.in.legend = TRUE)
 plotCalibration(xb2, bars = TRUE, model = "model", show.frequencies = T)
-plotCalibration(xb2, models = 1, bars = TRUE, names.cex = 1.3)
+# plotCalibration(xb2, models = 1, bars = TRUE, names.cex = 1.3)
 
 paste0(colnames(train), collapse = "+")
 str(train)
