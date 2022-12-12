@@ -43,7 +43,7 @@ devtools::install_github("lchiffon/wordcloud2")
 
 # library
 library(wordcloud2) 
-letterCloud( demoFreq, word = "R", color='random-light' , backgroundColor="black")
+letterCloud( demoFreq, word = "THANKS PET!", color='random-light' , backgroundColor="black")
 my_graph <- letterCloud( demoFreq, word = "PET", color="white", backgroundColor="pink")
 
 # Export the wordcloud
