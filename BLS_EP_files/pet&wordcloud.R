@@ -36,7 +36,7 @@ totalSUV(suv, mask, z, bg, local = TRUE)
 
 #############################
 # wordcloud
-options("repos" = c(CRAN="https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))#设置清华镜像
+options("repos" = c(CRAN="https://mirrors.tuna.tsinghua.edu.cn/CRAN/")) # 设置清华镜像
 install.packages("jsonlite")    #一定要安装这个包
 library('devtools')
 devtools::install_github("lchiffon/wordcloud2")
@@ -44,7 +44,7 @@ devtools::install_github("lchiffon/wordcloud2")
 # library
 library(wordcloud2) 
 letterCloud( demoFreq, word = "R", color='random-light' , backgroundColor="black")
-letterCloud( demoFreq, word = "PEACE", color="white", backgroundColor="pink")
+my_graph <- letterCloud( demoFreq, word = "PET", color="white", backgroundColor="pink")
 
 # Export the wordcloud
 # Wordcloud2 is a html widget. It means your wordcloud will be output in a HTML format.You can export it as a png image using rstudio, or using the webshot library as follow:
@@ -60,7 +60,7 @@ my_graph <- wordcloud2(demoFreq, size=1.5)
 
 # save it in html
 library("htmlwidgets")
-saveWidget(my_graph,"tmp.html",selfcontained = F)
+saveWidget(my_graph,"./BLS_EP_files/tmp.html",selfcontained = F)
 
 # and in png or pdf
-webshot("tmp.html","fig_1.pdf", delay =5, vwidth = 480, vheight=480)
+webshot("./BLS_EP_files/tmp.html","./BLS_EP_files/fig_1.pdf", delay =5, vwidth = 480, vheight=480)
