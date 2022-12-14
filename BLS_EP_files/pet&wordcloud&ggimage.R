@@ -82,9 +82,9 @@ p <- ggplot(dt, aes(x=Year, y=Publications, group=group)) +
 p
 p + ggimage::geom_image()
 getwd()
-img = "./BLS_EP_files/SIGNA-PET-MR.jpg"
+img = "./BLS_EP_files/pet_clinical-100_2.jpg"
 ggbackground(p, img)
-ggbackground(p, img, alpha = 0.009) # color="steelblue"
+ggbackground(p, img, alpha = 0.00009) # color="steelblue"
 ggbackground(p, img, 
              image_fun = function(x) image_negate(image_convolve(x, 'DoG:0,10,10')))
 # Use custom color palettes
