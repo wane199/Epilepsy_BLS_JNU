@@ -1,6 +1,5 @@
 # https://github.com/cxli233/ggpathway
 # https://mp.weixin.qq.com/s?__biz=Mzg3MzQzNTYzMw==&mid=2247500255&idx=1&sn=a7e14dafa645ccf5a9ed11bf5e2c1d12&chksm=cee29941f99510577ef8f1223108c8df337dd08760fc6ffc02e9ad322cddcfc2baf066849ce0&mpshare=1&scene=1&srcid=12052bMoDDkCPnt1WoZd7Yj3&sharer_sharetime=1670383300989&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd
-
 # 加载R包
 rm(list = ls())
 library(tidyverse)
@@ -144,6 +143,24 @@ ggraph(example3_network_trim, layout = "manual",
 
 ggsave("./EP_Cox_Nomo/ggpathway/TCA_2.svg", height = 4, width = 5, bg = "white")
 ggsave("./EP_Cox_Nomo/ggpathway/TCA_2.png", height = 4, width = 5, bg = "white")
+
+########################################
+# 基因/通路上下游调控分析
+# R包安装
+library(devtools)
+install_github("noriakis/CBNplot")
+
+library(MicrobiomeProfiler)
+data(Rat_data)
+ko.res <- enrichKO(Rat_data)
+exp.dat <- matrix(abs(rnorm(910)), 91, 10) %>% magrittr::set_rownames(value=Rat_data) %>% magrittr::set_colnames(value=paste0('S', seq_len(ncol(.))))
+exp.dat %>% head
+library(CBNplot)
+bngeneplot(ko.res, exp=exp.dat, pathNum=1, orgDb=NULL)
+
+
+
+
 
 
 
