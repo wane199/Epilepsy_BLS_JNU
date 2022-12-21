@@ -87,3 +87,111 @@ fit <- gbm(formula = Surv(OS.time,OS)~.,data = est_dd,distribution = 'coxph',
            cv.folds = 10,n.cores = 6)
 
 
+###########################################
+# [Survival Analysis in mlr3proba](https://mran.microsoft.com/snapshot/2020-01-15/web/packages/mlr3proba/vignettes/survival.html)
+# Survival Tasks
+# Unlike TaskClassif and TaskRegr which have a single ‘target’ argument, TaskSurv mimics the survival::Surv object and has three-four target arguments (dependent on censoring type)
+rm(list = ls())
+library(mlr3proba); library(mlr3); library(survival)
+# type = "right" is default
+TaskSurv$new(id = "right_censored", backend = survival::rats,
+             time = "time", event = "status", type = "right")
+
+task = TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
+                    time = "start", time2 = "stop", type = "interval2")
+task
+task$truth()[1:10]
+
+# Train and Predict
+# create task and learner
+# veteran = mlr3misc::load_dataset("veteran", package = "survival")
+veteran = survival::veteran
+task_veteran = TaskSurv$new(id = "veteran", backend = veteran, time = "time", event = "status")
+learner = lrn("surv.coxph")
+
+# train/test split 
+train_set = sample(task_veteran$nrow, 0.7 * task_veteran$nrow)
+test_set = setdiff(seq_len(task_veteran$nrow), train_set)
+
+# fit Cox PH and inspect model
+learner$train(task_veteran, row_ids = train_set)
+learner$model
+
+prediction = learner$predict(task_veteran, row_ids = test_set)
+prediction
+
+# Evaluate - crank, lp, and distr
+# In the previous example, Cox model predicts `lp` so `crank` is identical
+all(prediction$lp == prediction$crank)
+prediction$lp[1:10]
+
+# These are evaluated with measures of discrimination and calibration.
+# As all PredictionSurv objects will return crank, Harrell's C is the default measure.
+prediction$score()
+
+# distr is evaluated with probabilistic scoring rules.
+measure = lapply(c("surv.graf", "surv.rmse"), msr)
+prediction$score(measure)
+
+# Often measures can be integrated over mutliple time-points, or return
+# predictions for single time-points
+measure = msr("surv.graf", times = 60)
+prediction$score(measure)
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+# All Together Now
+# Putting all of this together we can perform a (overly simplified) benchmark experiment to find the best learner for making predictions on a simulated dataset.
+library(mlr3pipelines); library(mlr3); library(mlr3tuning); library(paradox)
+set.seed(123)
+
+task = tgen("simsurv")$generate(50)
+composed_lrn_gbm = distrcompositor(lrn("surv.gbm", bag.fraction = 1, n.trees = 50L),
+                                   "kaplan", "ph")
+
+lrns = lapply(paste0("surv.", c("kaplan", "coxph", "parametric")), lrn)
+lrns[[3]]$param_set$values = list(dist = "weibull", type = "ph")
+
+design = benchmark_grid(tasks = task, learners = c(lrns, list(composed_lrn_gbm)),
+                        resamplings = rsmp("cv", folds = 2))
+
+bm = benchmark(design)
+bm$aggregate(lapply(c("surv.harrellC","surv.graf","surv.grafSE"), msr))[,c(4, 7:9)]
+
+
+
+library(mlr3); library(mlr3proba)
+library(mlr3learners); library(mlr3pipelines)
+library(mlr3verse)
+kaplan = lrn("surv.kaplan")
+cox = lrn("surv.coxph")
+xgb = ppl("distrcompositor", learner = lrn("surv.xgboost"), estimator = "kaplan", form = "ph")
+learners = list(cox, kaplan, xgb)
+task = TaskSurv$new(id = "rats", backend = survival::rats[,1:4], time = "time", event = "status")
+resample = rsmp("cv", folds = 5)
+design = benchmark_grid(task, learners, resample)
+bm = benchmark(design)
+bm$aggregate(msr("surv.intlogloss"))
+
+autoplot(res)
+
+
+
+
+
+
+
+
