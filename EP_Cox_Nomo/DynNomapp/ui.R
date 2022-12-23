@@ -1,4 +1,4 @@
-ui = bootstrapPage(fluidPage(theme = shinytheme("journal"), # cyborg/darkly/slate/superhero
+ui = bootstrapPage(fluidPage(theme = shinytheme("cyborg"), # cyborg/darkly/slate/superhero
                              titlePanel('TLE Relapse Dynamic Nomogram from JNU'),
                              sidebarLayout(sidebarPanel(uiOutput('manySliders'),
                                                         checkboxInput('trans', 'Alpha blending (transparency)', value = TRUE),
