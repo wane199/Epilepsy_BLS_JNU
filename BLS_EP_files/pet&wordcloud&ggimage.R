@@ -71,7 +71,8 @@ webshot("./BLS_EP_files/tmp.html", "./BLS_EP_files/fig_1.pdf", delay = 5, vwidth
 require(magick)
 require(ggplot2)
 require(ggimage) 
-dt <- read.csv('/Users/mac/Downloads/PubMed_Timeline_Results_by_Year_NM.csv')
+getwd()
+dt <- read.csv('./BLS_EP_files/PubMed_Timeline_Results_by_Year_NM.csv')
 dt$Year <- factor(dt$Year)
 p <- ggplot(dt, aes(x=Year, y=Publications, group=group)) +
   geom_line(aes(color=group)) + theme_classic() + ylab('Number of Publications Per Year') +
@@ -81,18 +82,18 @@ p <- ggplot(dt, aes(x=Year, y=Publications, group=group)) +
 # theme(legend.title=element_blank())
 p
 p + ggimage::geom_image()
-getwd()
+
 img = "./BLS_EP_files/pet_clinical-100_2.jpg"
 ggbackground(p, img)
 ggbackground(p, img, alpha = 0.00009) # color="steelblue"
 ggbackground(p, img, 
              image_fun = function(x) image_negate(image_convolve(x, 'DoG:0,10,10')))
 # Use custom color palettes
-p+scale_color_manual(values=c("#E69F00", "#56B4E9"))
+p + scale_color_manual(values=c("#E69F00", "#56B4E9"))
 # Use brewer color palettes
-p+scale_color_brewer(palette="Dark2")
+p + scale_color_brewer(palette="Dark2")
 # Use grey scale
-p +scale_color_grey() + theme_classic()
+p + scale_color_grey() + theme_classic()
 ####### Add Background Image to ggplot2
 library(ggpubr)
 library(jpeg)
