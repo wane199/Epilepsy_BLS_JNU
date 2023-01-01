@@ -48,7 +48,7 @@ letterCloud(ai, word = "PET", color = "random-light", backgroundColor = "black")
 ai <- read.csv("./BLS_EP_files/Most_Frequent_Words.csv")
 rownames(ai) <- ai[, 1]
 head(ai)
-letterCloud(ai, word = "PET", color = "black", backgroundColor = "pink")
+letterCloud(ai, word = "PET", color = "random-light", backgroundColor = "pink")
 my_graph <- letterCloud(ai, word = "PET", color = "white", backgroundColor = "pink")
 my_graph
 
