@@ -1,51 +1,51 @@
 word,freq
-mri,39
-classification,37
-temporal-lobe epilepsy,37
-surgery,22
-atrophy,16
-children,15
-brain,14
-connectivity,14
-abnormalities,12
-alzheimers-disease,12
-segmentation,12
-features,11
-functional connectivity,11
-networks,11
-organization,10
-epilepsy,9
-cortex,8
-eeg,8
-patterns,8
-prediction,8
-voxel-based morphometry,8
-fdg-pet,7
-ilae commission,7
-resection,7
-sclerosis,7
-seizures,7
-diffusion,6
-improves detection,6
-lateralization,6
-volume,6
-white-matter,6
-amygdala,5
-automated detection,5
-cortical thickness,5
-diagnosis,5
-fmri,5
-gray-matter,5
-hippocampal sclerosis,5
-human cerebral-cortex,5
-parkinsons-disease,5
-pet,5
-surgical outcomes,5
-thickness,5
-atlas,4
-cortical dysplasia,4
-focal cortical dysplasia,4
-functional mri,4
-hippocampus,4
-human brain,4
-images,4
+mri,69
+classification,67
+temporal-lobe epilepsy,67
+surgery,52
+atrophy,46
+children,45
+brain,44
+connectivity,44
+abnormalities,42
+alzheimers-disease,42
+segmentation,42
+features,41
+functional connectivity,41
+networks,41
+organization,40
+epilepsy,39
+cortex,38
+eeg,38
+patterns,38
+prediction,38
+voxel-based morphometry,38
+fdg-pet,37
+ilae commission,37
+resection,37
+sclerosis,37
+seizures,37
+diffusion,36
+improves detection,36
+lateralization,36
+volume,36
+white-matter,36
+amygdala,35
+automated detection,35
+cortical thickness,35
+diagnosis,35
+fmri,35
+gray-matter,35
+hippocampal sclerosis,35
+human cerebral-cortex,35
+parkinsons-disease,35
+pet,35
+surgical outcomes,35
+thickness,35
+atlas,34
+cortical dysplasia,34
+focal cortical dysplasia,34
+functional mri,34
+hippocampus,34
+human brain,34
+images,34
