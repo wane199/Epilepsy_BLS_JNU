@@ -9,23 +9,25 @@ colon <- colon
 str(colon)
 
 # 将分层变量rx由3个水平变为2个水平
-oldvals <- c('Obs','Lev','Lev+5FU')
-newvals <- factor(c('观察组','治疗组','治疗组'))
-colon$newrx <- newvals[match(colon$rx,oldvals)]
+oldvals <- c("Obs", "Lev", "Lev+5FU")
+newvals <- factor(c("观察组", "治疗组", "治疗组"))
+colon$newrx <- newvals[match(colon$rx, oldvals)]
 
 # 生存率估计，按newrx进行分层
-fit <- survfit(Surv(time,status)~newrx,data = colon)
+fit <- survfit(Surv(time, status) ~ newrx, data = colon)
 summary(fit)
 
 library(jskm) # 进行landmark分析
 # 简单设置
 jskm(fit, marks = T, cut.landmark = 720)
 # 图片格式修改调整
-jskm(fit,marks = F,pval = T,table = T,label.nrisk = "No. at risk",
-     size.label.nrisk = 8,xlabs = "days",ylabs = "Survival",
-     ystrataname = "rx", ystratalabs = c("观察组","治疗组"),
-     legendposition = c(0.85,0.9),timeby = 360,ylines=c(0.25,1),
-     cut.landmark = 720)
+jskm(fit,
+  marks = F, pval = T, table = T, label.nrisk = "No. at risk",
+  size.label.nrisk = 8, xlabs = "days", ylabs = "Survival",
+  ystrataname = "rx", ystratalabs = c("观察组", "治疗组"),
+  legendposition = c(0.85, 0.9), timeby = 360, ylines = c(0.25, 1),
+  cut.landmark = 720
+)
 
 ################################################
 # 程序包的安装及数据的加载
@@ -37,45 +39,24 @@ library(tidyverse)
 library(survminer)
 
 # data<- read_csv("Checkmate057.csv")
-fkdt <- tibble(subject = as.factor(1:10), 
-               time = sample(4:20, 10, replace = T),
-               status = sample(c("Censor", rep("Event", 2)), 10, 
-                               replace = T)) 
+# fkdt <- tibble(subject = as.factor(1:10),
+#                time = sample(4:20, 10, replace = T),
+#                status = sample(c("Censor", rep("Event", 2)), 10,
+#                                replace = T))
 
-fkdt <- transform(colon, subject = as.factor(1:nrow(colon)))
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv", sep = ",", header = TRUE)
+fkdt <- transform(dt, subject = as.factor(1:nrow(dt)))
 colnames(fkdt)
-ggplot(fkdt, aes(subject, time)) + 
-  geom_bar(stat = "identity", width = 0.5) + 
-  geom_point(data = fkdt, 
-             aes(subject, time, color = factor(status), shape = factor(status)), 
-             size = 6) +
+ggplot(fkdt, aes(subject, Follow_up_timemon)) +
+  geom_bar(stat = "identity", width = 0.15) +
+  geom_point(
+    data = fkdt,
+    aes(subject, Follow_up_timemon, color = factor(Rel._in_5yrs), shape = factor(Rel._in_5yrs)),
+    size = 2
+  ) +
   coord_flip() +
-  theme_minimal() + 
-  theme(legend.title = element_blank(),
-        legend.position = "bottom")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  theme_minimal() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "bottom"
+  )
