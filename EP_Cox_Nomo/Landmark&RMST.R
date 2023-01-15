@@ -45,10 +45,15 @@ library(survminer)
 #                                replace = T))
 
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv", sep = ",", header = TRUE)
+# 设置因子的水平标签
+dt$Rel._in_5yrs <- factor(dt$Rel._in_5yrs,
+                          levels = c(0, 1),
+                          labels = c("未复发", "复发"))
 fkdt <- transform(dt, subject = as.factor(1:nrow(dt)))
 colnames(fkdt)
+# 游泳图（Swimmer Plots）
 ggplot(fkdt, aes(subject, Follow_up_timemon)) +
-  geom_bar(stat = "identity", width = 0.15) +
+  geom_bar(stat = "identity", width = 0.25) +
   geom_point(
     data = fkdt,
     aes(subject, Follow_up_timemon, color = factor(Rel._in_5yrs), shape = factor(Rel._in_5yrs)),
@@ -56,7 +61,21 @@ ggplot(fkdt, aes(subject, Follow_up_timemon)) +
   ) +
   coord_flip() +
   theme_minimal() +
-  theme(
+  theme(axis.text.y = element_text(color = "grey20", size = 4, angle = 30, hjust = 1, vjust = 0, face = "plain"), 
     legend.title = element_blank(),
     legend.position = "bottom"
   )
+# 可视化数据框热图
+library(funkyheatmap)
+library(kableExtra)
+data <- dt[,6:24]
+data <- transform(data, ID = as.factor(1:nrow(data)))
+data <- data %>% 
+  rownames_to_column("id") %>%
+  # arrange(desc()) %>%
+  head(20)
+funky_heatmap(dt[,6:24])
+
+
+
+
