@@ -1,10 +1,11 @@
 # https://r-graph-gallery.com/215-the-heatmap-function.html
 rm(list = ls())
 # 读入数据
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
 dt <- read.csv("/home/wane/Desktop/EP/Structured_Data/PET-TLE234-radscore-RCS2.csv", row = 2)
 # dt <- read.csv("/media/wane/UNTITLED/BLS-ep-pre/EP/Structured_Data/Task2/COX12mon/TLE234group.csv")
 dt <- dt[-1]
-
+dt <- dt[,5:24]
 ## Create a variable indicating 1-year event**
 dt <- within(dt, {
   outcome1yr <- NA
@@ -25,8 +26,9 @@ test <- subset(dt, dt$Group == "Test")
 # dtx <- scale(dt[, c(7)])
 
 # rownames(dt) <- dt[, 1]
-dt <- dt[order(dt$oneyr), ] # 重排序
-data <- as.matrix(dt[2:16])
+dt <- transform(dt, ID = as.factor(1:nrow(dt)))
+dt <- dt[order(dt$ID), ] # 重排序
+data <- as.matrix(dt[2:20])
 # t(data) # transpose the matrix with to swap X and Y axis.
 # Use 'scale' to normalize
 # No dendrogram nor reordering for neither column or row
