@@ -5,7 +5,7 @@ dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.c
 dt <- read.csv("/home/wane/Desktop/EP/Structured_Data/PET-TLE234-radscore-RCS2.csv", row = 2)
 # dt <- read.csv("/media/wane/UNTITLED/BLS-ep-pre/EP/Structured_Data/Task2/COX12mon/TLE234group.csv")
 dt <- dt[-1]
-dt <- dt[,5:24]
+dt <- dt[, 5:24]
 ## Create a variable indicating 1-year event**
 dt <- within(dt, {
   outcome1yr <- NA
@@ -342,81 +342,96 @@ df <- read.csv("C:\\Users\\wane199\\Desktop\\EP\\REFER\\BLS\\KAI\\coef.minPTcox_
   arrange(desc(per)) %>%
   ungroup()
 # 绘制饼图
-myLabel = as.vector(df$group)   ## 转成向量，否则图例的标签可能与实际顺序不一致
+myLabel <- as.vector(df$group) ## 转成向量，否则图例的标签可能与实际顺序不一致
 
-df1 <-  df %>% group_by(group) %>%
+df1 <- df %>%
+  group_by(group) %>%
   mutate(per = n() / nrow(df) * 100) %>%
   arrange(desc(per))
 str(df1)
 summary(df1)
-p <- df %>% group_by(group) %>%
+p <- df %>%
+  group_by(group) %>%
   summarise(per = n() / nrow(df)) %>%
-  ggplot(aes(x="",y=per,fill=group))+
-  geom_col()+ coord_polar("y")+
-  scale_fill_npg()+
-  theme_void() + geom_text(aes(label = paste0(round(per * 100, 2), "%")),
-                             position = position_fill(vjust = 0.5))+ 
-  geom_text(aes(label = group,size=5,colour="blue"),
-            position = position_fill(vjust = 0.7, reverse = F)) + 
+  ggplot(aes(x = "", y = per, fill = group)) +
+  geom_col() +
+  coord_polar("y") +
+  scale_fill_npg() +
+  theme_void() +
+  geom_text(aes(label = paste0(round(per * 100, 2), "%")),
+    position = position_fill(vjust = 0.5)
+  ) +
+  geom_text(aes(label = group, size = 5, colour = "blue"),
+    position = position_fill(vjust = 0.7, reverse = F)
+  ) +
   theme(legend.position = "non")
 p
 # 绘制环状条图
 p3 <- ggplot(
   df1,
   aes(Feature, Coef, fill = Feature)
-) + geom_col() +  theme_bw() +
+) +
+  geom_col() +
+  theme_bw() +
   geom_text(
     aes(label = Coef, y = Coef + 0.05),
     position = position_dodge(0.9), size = 3,
     vjust = 0
-  ) + 
+  ) +
   theme(
     panel.border = element_blank(),
     legend.position = "none",
     axis.text.x = element_text(size = 6.5, vjust = 0.5)
-  ) + coord_curvedpolar()
+  ) +
+  coord_curvedpolar()
 
 ggplot(df1) +
-  geom_col(aes(x = Feature, y = per, fill = group),position = "dodge", width=0.6) + 
-  coord_polar()+
+  geom_col(aes(x = Feature, y = per, fill = group), position = "dodge", width = 0.6) +
+  coord_polar() +
   theme_minimal() +
   theme(
     legend.position = "none",
-    plot.background =element_blank(),
+    plot.background = element_blank(),
     panel.background = element_blank(),
     panel.grid = element_blank(),
     axis.text.y = element_blank(),
     axis.title = element_blank(),
-    axis.text.x = element_blank())
+    axis.text.x = element_blank()
+  )
 p2 <- ggplot(df1) +
   # 设置刻度线
-  annotate("segment", x = -Inf, xend = Inf, y = seq(0,10,1), yend = seq(0,10,1),
-           size = rep(c(0.25, 0.1),length.out =11), alpha = 0.5)+
-  # 添加标签 
+  annotate("segment",
+    x = -Inf, xend = Inf, y = seq(0, 10, 1), yend = seq(0, 10, 1),
+    size = rep(c(0.25, 0.1), length.out = 11), alpha = 0.5
+  ) +
+  # 添加标签
   # annotate("label", x = 0, y = seq(0,10,1), label = seq(0,10,1),color="black",
   #          size = 3, fill = "#FEF8FA",label.padding = unit(0.1,"lines"),
   #          label.size = 0)+
-  geom_col(aes(x = Feature, y = per, fill = group),position = "dodge", width=0.6)+
-  scale_y_continuous(limits = c(-4,10)) +
-  scale_x_continuous(limits = c(-0.5,38.5), breaks = 1:38.5) +
-  scale_fill_manual(values=c("#709AE1FF","#8A9197FF","#D2AF81FF","#FD7446FF",
-                             "#D5E4A2FF","#197EC0FF","#F05C3BFF","#46732EFF",
-                             "#71D0F5FF","#075149FF","#C80813FF","#91331FFF"))+
-  coord_polar()+
+  geom_col(aes(x = Feature, y = per, fill = group), position = "dodge", width = 0.6) +
+  scale_y_continuous(limits = c(-4, 10)) +
+  scale_x_continuous(limits = c(-0.5, 38.5), breaks = 1:38.5) +
+  scale_fill_manual(values = c(
+    "#709AE1FF", "#8A9197FF", "#D2AF81FF", "#FD7446FF",
+    "#D5E4A2FF", "#197EC0FF", "#F05C3BFF", "#46732EFF",
+    "#71D0F5FF", "#075149FF", "#C80813FF", "#91331FFF"
+  )) +
+  coord_polar() +
   theme_minimal() +
   theme(
     legend.position = "none",
-    plot.background =element_blank(),
+    plot.background = element_blank(),
     panel.background = element_blank(),
     panel.grid = element_blank(),
     axis.text.y = element_blank(),
     axis.title = element_blank(),
-    axis.text.x = element_blank())
+    axis.text.x = element_blank()
+  )
 p2
 
 # 拼图
-ggdraw(p3)+
-  draw_plot(p,scale=0.13,x=0,y=0)
+ggdraw(p3) +
+  draw_plot(p, scale = 0.13, x = 0, y = 0)
 
 # geomtextpath | 成功让你的ggplot注释拥有傲人曲线！
 library(geomtextpath)
@@ -428,12 +443,14 @@ pie + coord_curvedpolar(theta = "y")
 p <- ggplot(
   df,
   aes(Feature, Coef, fill = Feature)
-) + geom_col() +  theme_bw() +
+) +
+  geom_col() +
+  theme_bw() +
   geom_text(
     aes(label = Coef, y = Coef + 0.05),
     position = position_dodge(0.9), size = 3,
     vjust = 0
-  ) + 
+  ) +
   theme(
     panel.border = element_blank(),
     legend.position = "none",
