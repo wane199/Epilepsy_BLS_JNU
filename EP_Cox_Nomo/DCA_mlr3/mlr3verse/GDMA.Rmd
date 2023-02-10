@@ -1,5 +1,5 @@
 ---
-title: "Interpretable Machine Learning of PET Imaging for Individualized Predictions of Seizure Outcomes after Temporal Lobe Epilepsy Surgery" # $^{18}$F-FDG 
+title: "Interpretable Machine Learning of PET Imaging for Individualized Predictions of Seizure Outcomes after Temporal Lobe Epilepsy Surgery" 
 subtitle: ""
 author: 
   - "Huanhua Wu  \t\n Prof. Hao Xu$^{*}$ &nbsp;"
