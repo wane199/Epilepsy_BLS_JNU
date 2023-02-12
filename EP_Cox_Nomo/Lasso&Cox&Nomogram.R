@@ -8,7 +8,7 @@ getwd()
 # setwd("/home/wane/Documents/RDocu") ## 设置工作目录
 rm(list = ls())
 list.files() ## 列出工作目录下的文件
-options(digits = 3) # 限定输出小数点后数字的位数为3位
+options(digits = 5) # 限定输出小数点后数字的位数为3位
 library(glmnet) ## Lasso回归、岭回归、弹性网络模型
 library(caret) ## 标准化及混淆矩阵
 library(survival) ## 生存分析包, 包括非参数(Kaplan-Meier分析)和半参数(CPH), 参数模型(参数比例，附加危害，AFT)
@@ -24,6 +24,7 @@ library(My.stepwise)
 dt <- read.csv("/home/wane/Desktop/EP/sci/cph/cph2/Test_MRIneg-78_CSB.csv")
 dt <- read.csv("/Users/mac/Desktop/BLS-ep-pre/EP/sci/cph/TLE234group_factor.csv")
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv")
 
 table(dt$Freq)
 dt <- dt[c(-1:-3)]
@@ -260,7 +261,8 @@ ggplot(lasso_coef, aes(x = reorder(Feature, Coef), y = Coef, fill = Coef)) +
   coord_flip() +
   geom_bar(stat = "identity", colour = "black", width = 0.78, size = 0.25, position = position_dodge(0.7)) +
   # ylim(-0.30, 0.20) +
-  geom_text(aes(label = Coef), vjust = -0.2) +theme(panel.grid.major.y = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(aes(label = Coef), vjust = -0.2) +
+  theme(panel.grid.major.y = element_blank(), panel.grid.minor = element_blank()) +
   theme(axis.ticks.y = element_blank()) +
   theme(panel.border = element_blank()) +
   theme(axis.title.x = element_text(face = "bold")) +
@@ -446,30 +448,41 @@ ggarrange(p1, p2,
 )
 # tableone 基线特征描述统计
 library(autoReg)
-for (i in names(train)[c(6:7, 9:10, 14:23)]) {
+for (i in names(dt)[c(7, 10:11, 15:24)]) {
+  dt[, i] <- as.factor(dt[, i])
+}
+for (i in names(train)[c(7, 10:11, 15:24)]) {
   train[, i] <- as.factor(train[, i])
 }
-
-for (i in names(test)[c(6:7, 9:10, 14:23)]) {
+for (i in names(test)[c(7, 10:11, 15:24)]) {
   test[, i] <- as.factor(test[, i])
 }
 
-ft <- gaze(Rel._in_5yrs ~ ., data = train[, ]) %>% myft()
+ft <- gaze(Group ~ ., data = dt[c(-1:-2, -4:-5)]) %>% myft()
+ft <- gaze(Rel._in_5yrs ~ ., data = test[c(-1:-5)]) %>% myft()
 ft
 library(rrtable)
 table2pptx(ft) # Exported table as Report.pptx
 table2docx(ft) # Exported table as Report.docx
-table2docx(ft, title = "Test", append = TRUE, vanilla = TRUE)
+table2docx(ft, title = "dt", append = TRUE, vanilla = TRUE)
 library(CBCgrps)
-tab1 <- twogrps(dt[c(-1, -2, -4)], gvar = "Group", skewvar = c("radscore"))
-tab1 <- twogrps(test[c(-1)], gvar = "Rel._in_5yrs", skewvar = c("Durmon"))
+# 当样本量大于等于50时，采用kolmogorov-Smirnov检验；样本量小于50时，采用Shapiro-Wilk检验。
+ks.test(dt[14]) # 样本量大于等于50
+unlist(names(dt[c(8:9, 12:14)]))
+nortest1 <- shapiro.test(dt[, 9])
+nortest1
+tab1 <- twogrps(dt[c(-1:-2, -4:-5)], gvar = "Group", skewvar = c("AI_radscore", "Lat_radscore", "Surgmon", "Onsetmon", "Durmon"))
+
+tab1 <- twogrps(test[c(-1:-5)], gvar = "Rel._in_5yrs", skewvar = c("AI_radscore", "Lat_radscore", "Surgmon", "Onsetmon", "Durmon"))
 print(tab1, quote = T)
-write.csv(tab1[1], "/home/wane/Desktop/EP/Structured_Data/Task2/testtable1.csv", row.names = F)
+write.csv(tab1[1], "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\table1_test.csv", row.names = F)
 # 基线资料汇总，tableone
 library(tableone)
 ## 需要转为分类变量的变量
+unlist(names(dt[c(7, 10:11, 15:24)]))
 catVars <- c("Sex")
-paste0(unlist(names(train)), collapse = "+")
+
+paste0(unlist(names(dt[c(7, 10:11, 15:24)])), collapse = " ")
 ## Create a TableOne object
 tab <- CreateTableOne(data = dt, strata = "Group", factorVars = catVars, addOverall = TRUE)
 print(tab, showAllLevels = TRUE)
@@ -755,7 +768,8 @@ train <- within(train, {
 })
 model1 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train) # SGS + Durmon,
 print(model1, data = train)
-p <- ggforest(model1, main = "Hazard ratio", refLabel = "reference",
+p <- ggforest(model1,
+  main = "Hazard ratio", refLabel = "reference",
   noDigits = 3, # 保留HR值以及95%CI的小数位数
   data = train
 ) # https://cache.one/read/16896085
@@ -765,20 +779,22 @@ topptx(figure = p, filename = "/home/wane/Desktop/EP/sci/cph/forest.pptx")
 library(forplo)
 DT::datatable(train)
 library(autoReg)
-autoReg(model1, uni = T, threshold = 0.1, 
-        final = T) %>% myft()
+autoReg(model1,
+  uni = T, threshold = 0.1,
+  final = T
+) %>% myft()
 forplo(model1,
-       font='Arial',
-       sort = T,
-       # flipbelow1=T,
-       left.align=T,
-       ci.edge= T,
-       scaledot.by=abs(coef(model1)),
-       col = '#BAD1C2',
-       char = 20,
-       shade.every = 1,
-       shade.col = '#FDF0E0',
-       shade.alpha = 0.8
+  font = "Arial",
+  sort = T,
+  # flipbelow1=T,
+  left.align = T,
+  ci.edge = T,
+  scaledot.by = abs(coef(model1)),
+  col = "#BAD1C2",
+  char = 20,
+  shade.every = 1,
+  shade.col = "#FDF0E0",
+  shade.alpha = 0.8
 )
 
 ### 开始cox-nomo graph
@@ -1559,22 +1575,24 @@ dt <- dt %>%
   as_tibble(dt) %>%
   mutate(novelscore = 2.08 * AI_radscore
     + 1.55 * Lat_radscore
-    + 1.48 * SGS 
+    + 1.48 * SGS
     + 1.00 * Durmon)
 
 novelscore <- as.data.frame(dt["novelscore"])
 hist(dt$novelscore)
 dt$Rel._in_5yrs <- factor(dt$Rel._in_5yrs)
 library(cutoff)
-cox(data=dt,
-    time = 'Follow_up_timemon', y='Rel._in_5yrs', x='novelscore',
-    cut.numb=2,
-    n.per=0.25,
-    y.per=0.10,
-    p.cut=0.05,
-    strict=TRUE,
-    include='low',
-    round=2)
+cox(
+  data = dt,
+  time = "Follow_up_timemon", y = "Rel._in_5yrs", x = "novelscore",
+  cut.numb = 2,
+  n.per = 0.25,
+  y.per = 0.10,
+  p.cut = 0.05,
+  strict = TRUE,
+  include = "low",
+  round = 2
+)
 logresult <- cutoff::logrank(
   data = dt, # 数据集
   time = "Follow_up_timemon", # 生存时间
@@ -1611,18 +1629,18 @@ ggsurvplot(fit,
 )
 # 绘制累积风险曲线
 ggsurvplot(fit,
-           plaette = "#2E9FDF", data = dt,
-           fun = "cumhaz", # 绘制累积风险曲线
-           conf.int = T, pval = T,
-           palette = c("#E7B800", "#2E9FDF"),
-           legend.labs = c("novelscore-low", "novelscore-high"),
-           xlab = "Time in months", ylab = "Cum Relapse"
+  plaette = "#2E9FDF", data = dt,
+  fun = "cumhaz", # 绘制累积风险曲线
+  conf.int = T, pval = T,
+  palette = c("#E7B800", "#2E9FDF"),
+  legend.labs = c("novelscore-low", "novelscore-high"),
+  xlab = "Time in months", ylab = "Cum Relapse"
 )
 
 library(reportROC)
-reportROC(gold=dt$Rel._in_5yr,predictor=dt$novelscore,important="se",plot=TRUE)
-reportROC(gold=res.cat$Rel._in_5yr,predictor.binary=res.cat$novelscore,important="se",plot=TRUE)
-reportROC(gold=dt$Rel._in_5yr,predictor.binary=binary[1:50],exact=FALSE)
+reportROC(gold = dt$Rel._in_5yr, predictor = dt$novelscore, important = "se", plot = TRUE)
+reportROC(gold = res.cat$Rel._in_5yr, predictor.binary = res.cat$novelscore, important = "se", plot = TRUE)
+reportROC(gold = dt$Rel._in_5yr, predictor.binary = binary[1:50], exact = FALSE)
 
 
 # 交叉验证与重抽样, 重复论证
