@@ -464,7 +464,26 @@ ft
 library(rrtable)
 table2pptx(ft) # Exported table as Report.pptx
 table2docx(ft) # Exported table as Report.docx
-table2docx(ft, title = "dt", append = TRUE, vanilla = TRUE)
+table2docx(ft, title = "test", append = TRUE, vanilla = TRUE)
+
+library(gtsummary)
+t=tbl_summary(test,by='Rel._in_5yrs',digits = list(all_continuous()~1),
+              # label=list(age~'AGE',smoking~'Smoking'),
+              statistic=list(all_continuous()~"{median} ({IQR})",
+                             all_categorical()~"{n} ({p}%)"),
+              missing_text='(Missing)')
+
+t_1=add_overall(t)
+t_2=add_p(t_1)
+t_3=add_stat_label(t_2)
+t_4=modify_spanning_header(t_3,c("stat_1", "stat_2") ~ "**Relapse status**")
+t_5=modify_header(t_4,label~"Variable")
+t_6=modify_footnote(t_5,all_stat_cols()~"Mean (sd) or Median (IQR) or Frequency (%)")
+t_7=bold_labels(t_6)
+final_result<-bold_p(t_7)
+final_result
+
+
 library(CBCgrps)
 # 当样本量大于等于50时，采用kolmogorov-Smirnov检验；样本量小于50时，采用Shapiro-Wilk检验。
 ks.test(dt[14]) # 样本量大于等于50
@@ -472,16 +491,15 @@ unlist(names(dt[c(8:9, 12:14)]))
 nortest1 <- shapiro.test(dt[, 9])
 nortest1
 tab1 <- twogrps(dt[c(-1:-2, -4:-5)], gvar = "Group", skewvar = c("AI_radscore", "Lat_radscore", "Surgmon", "Onsetmon", "Durmon"))
-
 tab1 <- twogrps(test[c(-1:-5)], gvar = "Rel._in_5yrs", skewvar = c("AI_radscore", "Lat_radscore", "Surgmon", "Onsetmon", "Durmon"))
 print(tab1, quote = T)
 write.csv(tab1[1], "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\table1_test.csv", row.names = F)
 # 基线资料汇总，tableone
 library(tableone)
 ## 需要转为分类变量的变量
-unlist(names(dt[c(7, 10:11, 15:24)]))
+catVars <- unlist(names(dt[c(7, 10:11, 15:24)]))
+catVars
 catVars <- c("Sex")
-
 paste0(unlist(names(dt[c(7, 10:11, 15:24)])), collapse = " ")
 ## Create a TableOne object
 tab <- CreateTableOne(data = dt, strata = "Group", factorVars = catVars, addOverall = TRUE)
