@@ -483,7 +483,6 @@ t_7=bold_labels(t_6)
 final_result<-bold_p(t_7)
 final_result
 
-
 library(CBCgrps)
 # 当样本量大于等于50时，采用kolmogorov-Smirnov检验；样本量小于50时，采用Shapiro-Wilk检验。
 ks.test(dt[14]) # 样本量大于等于50
@@ -491,9 +490,9 @@ unlist(names(dt[c(8:9, 12:14)]))
 nortest1 <- shapiro.test(dt[, 9])
 nortest1
 tab1 <- twogrps(dt[c(-1:-2, -4:-5)], gvar = "Group", skewvar = c("AI_radscore", "Lat_radscore", "Surgmon", "Onsetmon", "Durmon"))
-tab1 <- twogrps(test[c(-1:-5)], gvar = "Rel._in_5yrs", skewvar = c("AI_radscore", "Lat_radscore", "Surgmon", "Onsetmon", "Durmon"))
+tab1 <- twogrps(dt[c(-1:-5)], gvar = "Rel._in_5yrs", skewvar = c("AI_radscore", "Lat_radscore", "Surgmon", "Onsetmon", "Durmon"))
 print(tab1, quote = T)
-write.csv(tab1[1], "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\table1_test.csv", row.names = F)
+write.csv(tab1[1], "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\table1_220.csv", row.names = F)
 # 基线资料汇总，tableone
 library(tableone)
 ## 需要转为分类变量的变量
