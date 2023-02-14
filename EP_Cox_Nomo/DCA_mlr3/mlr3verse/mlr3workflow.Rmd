@@ -8,7 +8,7 @@ fontsize: 11pt
 output: 
   beamer_presentation: 
     citation_package: natbib
-    theme: Singapore # metropolis
+    theme: metropolis
     fonttheme: structurebold
     colortheme: seahorse
     fig_caption: yes
