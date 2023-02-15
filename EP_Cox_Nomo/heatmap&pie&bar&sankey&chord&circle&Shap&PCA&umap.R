@@ -2,7 +2,7 @@
 rm(list = ls())
 # 读入数据
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
-dt <- read.csv("/home/wane/Desktop/EP/Structured_Data/PET-TLE234-radscore-RCS2.csv", row = 2)
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv", row = 5)
 # dt <- read.csv("/media/wane/UNTITLED/BLS-ep-pre/EP/Structured_Data/Task2/COX12mon/TLE234group.csv")
 dt <- dt[-1]
 dt <- dt[, 5:24]
@@ -28,11 +28,11 @@ test <- subset(dt, dt$Group == "Test")
 # rownames(dt) <- dt[, 1]
 dt <- transform(dt, ID = as.factor(1:nrow(dt)))
 dt <- dt[order(dt$ID), ] # 重排序
-data <- as.matrix(dt[2:20])
+data <- as.matrix(train[7:23])
 # t(data) # transpose the matrix with to swap X and Y axis.
 # Use 'scale' to normalize
 # No dendrogram nor reordering for neither column or row
-heatmap(data, Rowv = NA, margins = c(3, 3), Colv = NA, scale = "column")
+heatmap(data, Rowv = NA, margins = c(3, 3), Colv = NA, hclustfun = hclust, scale = "column")
 
 # 1: native palette from R
 heatmap(data, Colv = NA, Rowv = NA, scale = "column", col = cm.colors(256))
@@ -61,22 +61,26 @@ heatmap(data,
 # [pheatmap热图技巧合集](https://www.jianshu.com/p/86ae39a227f4)
 library(pheatmap)
 set.seed(123)
-pheatmap(data, scale = "column", cluster_row = F, cluster_col = FALSE, fontsize = 6, col = colMain)
+data <- train[, 7:23]
+pheatmap(data, scale = "column", angle_col = "315", show_rownames = F, cluster_row = F, cluster_col = T,cutree_cols = 2, fontsize = 6, col = cm.colors(100)) -> a # col = colMain
+a
+mat_cluster <- data[a$tree_row$order, a$tree_col$order]
+mat_cluster
 pheatmap(data, scale = "column", cluster_row = F, cluster_col = FALSE, fontsize = 6, col = coul, display_numbers = TRUE)
 
 # 9. 注释
-Group <- unlist(dt$oneyr) # 定义列名
+Group <- unlist(train$Rel._in_5yrs) # 定义列名
 group_sample <- data.frame(Group)
 rownames(group_sample) <- rownames(data)
 group_sample$Group <- factor(group_sample$Group)
 # 病例分组文件
 head(group_sample)
 pheatmap(data,
-  angle_col = "45", annotation_row = group_sample, # 聚类结果分成两类
-  gaps_row = 206, col = coul, # 在5和10行添加分隔  cutree_rows = 2, # 分割行 cutree_cols=2, # 分割列
+  angle_col = "315", annotation_row = group_sample, # 聚类结果分成两类
+  col = coul, cutree_cols = 2, # 在5和10行添加分隔 gaps_row = 206, cutree_rows = 2, # 分割行 cutree_cols=2, # 分割列
   scale = "column", # 列标准化 scale="row", # 行标准化
   annotation_legend = F, border = F, # 设定每个格子边框的颜色，border=F则无边框
-  cluster_rows = F, cluster_cols = F, # 对列聚类
+  cluster_rows = F, cluster_cols = T, # 对列聚类
   show_colnames = T, show_rownames = F # 是否显示行名
 )
 
@@ -101,7 +105,7 @@ hclust_mat$order
 hclust_mat$labels
 
 # reorder row_clust
-index <- seq(1, 234, by = 1)
+index <- seq(1, 171, by = 1)
 hclust_mat$order <- index
 pheatmap(data, cluster_rows = hclust_mat, scale = "column", cluster_row = F, cluster_col = FALSE, fontsize = 6, display_numbers = TRUE)
 
