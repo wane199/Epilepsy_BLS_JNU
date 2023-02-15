@@ -467,20 +467,24 @@ table2docx(ft) # Exported table as Report.docx
 table2docx(ft, title = "test", append = TRUE, vanilla = TRUE)
 
 library(gtsummary)
-t=tbl_summary(test,by='Rel._in_5yrs',digits = list(all_continuous()~1),
-              # label=list(age~'AGE',smoking~'Smoking'),
-              statistic=list(all_continuous()~"{median} ({IQR})",
-                             all_categorical()~"{n} ({p}%)"),
-              missing_text='(Missing)')
+t <- tbl_summary(test,
+  by = "Rel._in_5yrs", digits = list(all_continuous() ~ 1),
+  # label=list(age~'AGE',smoking~'Smoking'),
+  statistic = list(
+    all_continuous() ~ "{median} ({IQR})",
+    all_categorical() ~ "{n} ({p}%)"
+  ),
+  missing_text = "(Missing)"
+)
 
-t_1=add_overall(t)
-t_2=add_p(t_1)
-t_3=add_stat_label(t_2)
-t_4=modify_spanning_header(t_3,c("stat_1", "stat_2") ~ "**Relapse status**")
-t_5=modify_header(t_4,label~"Variable")
-t_6=modify_footnote(t_5,all_stat_cols()~"Mean (sd) or Median (IQR) or Frequency (%)")
-t_7=bold_labels(t_6)
-final_result<-bold_p(t_7)
+t_1 <- add_overall(t)
+t_2 <- add_p(t_1)
+t_3 <- add_stat_label(t_2)
+t_4 <- modify_spanning_header(t_3, c("stat_1", "stat_2") ~ "**Relapse status**")
+t_5 <- modify_header(t_4, label ~ "Variable")
+t_6 <- modify_footnote(t_5, all_stat_cols() ~ "Mean (sd) or Median (IQR) or Frequency (%)")
+t_7 <- bold_labels(t_6)
+final_result <- bold_p(t_7)
 final_result
 
 library(CBCgrps)

@@ -61,8 +61,9 @@ heatmap(data,
 # [pheatmap热图技巧合集](https://www.jianshu.com/p/86ae39a227f4)
 library(pheatmap)
 set.seed(123)
+train <- train[order(train$Rel._in_5yrs), ] # 重排序
 data <- train[, 7:23]
-pheatmap(data, scale = "column", angle_col = "315", show_rownames = F, cluster_row = F, cluster_col = T,cutree_cols = 2, fontsize = 6, col = cm.colors(100)) -> a # col = colMain
+pheatmap(data, scale = "column", angle_col = "315", show_rownames = F, cluster_row = F, cluster_col = T, cutree_cols = 2, fontsize = 6, col = cm.colors(100)) -> a # col = colMain
 a
 mat_cluster <- data[a$tree_row$order, a$tree_col$order]
 mat_cluster
@@ -76,8 +77,8 @@ group_sample$Group <- factor(group_sample$Group)
 # 病例分组文件
 head(group_sample)
 pheatmap(data,
-  angle_col = "315", annotation_row = group_sample, # 聚类结果分成两类
-  col = coul, cutree_cols = 2, # 在5和10行添加分隔 gaps_row = 206, cutree_rows = 2, # 分割行 cutree_cols=2, # 分割列
+  angle_col = "315", annotation_row = group_sample, # 聚类结果分成两类 col = coul, colMain
+  col = cm.colors(100), cutree_cols = 2, # 在5和10行添加分隔 gaps_row = 206, cutree_rows = 2, # 分割行 cutree_cols=2, # 分割列
   scale = "column", # 列标准化 scale="row", # 行标准化
   annotation_legend = F, border = F, # 设定每个格子边框的颜色，border=F则无边框
   cluster_rows = F, cluster_cols = T, # 对列聚类
