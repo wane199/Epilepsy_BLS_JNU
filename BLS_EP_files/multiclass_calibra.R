@@ -63,3 +63,7 @@ write.csv(aql,'C:\\Users\\wane1\\Documents\\file\\sci\\bls\\mripredictions\\outp
 cal_plot_multi(aql, outcome = 'outcomes',model = 'classes', prediction = 'predictions', n_bins = 10000)
 threshperf_plot_multi(aql, outcome = 'outcomes', prediction = 'predictions', model = 'classes')
 
+library(riskRegression)
+
+
+
