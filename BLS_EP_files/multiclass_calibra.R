@@ -4,7 +4,6 @@ rm(list = ls())
 library(runway)
 library(multiROC)
 
-data(multi_model_dataset)
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\bls\\mripredictions\\outputsave\\test-cal-f3_f4.csv")
 head(dt)
 
@@ -49,7 +48,18 @@ ggplot(plot_roc_df, aes(x = 1-Specificity, y=Sensitivity)) + geom_path(aes(color
 ggplot(plot_pr_df, aes(x=Recall, y=Precision)) + geom_path(aes(color = Group, linetype=Method), size=1.5) + theme_bw() + theme(plot.title = element_text(hjust = 0.5), legend.justification=c(1, 0), legend.position=c(.95, .05), legend.title=element_blank(), legend.background = element_rect(fill=NULL, size=0.5, linetype="solid", colour ="black"))
 
 
-cal_plot_multi(multi_model_dataset, outcome = 'outcomes',model = 'model_name', prediction = 'predictions', n_bins = 5)
+data(multi_model_dataset)
+df <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\bls\\mripredictions\\outputsave\\test-cal-f4_1.csv")
+head(df)
 
+library(reshape2) #  首先加载一下reshape2包
+aql <- melt(df,  id.vars = c("outcomes"), variable.name = "classes", value.name = "predictions") 
+head(aql)  # 查看数据前6列
+tail(aql)   # 查看数据后6列
+df <- df0[,complete.cases(t(df0))]  # 提取不含空值的列
+aql <- aql[complete.cases(aql),]  # 提取不含空值的行
+write.csv(aql,'C:\\Users\\wane1\\Documents\\file\\sci\\bls\\mripredictions\\outputsave\\test-cal-f4_2.csv')
 
+cal_plot_multi(aql, outcome = 'outcomes',model = 'classes', prediction = 'predictions', n_bins = 10000)
+threshperf_plot_multi(aql, outcome = 'outcomes', prediction = 'predictions', model = 'classes')
 
