@@ -1,11 +1,11 @@
 # https://r-graph-gallery.com/215-the-heatmap-function.html
 rm(list = ls())
 # 读入数据
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group_factor.csv") # , row = 5
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv", row = 5)
 # dt <- read.csv("/media/wane/UNTITLED/BLS-ep-pre/EP/Structured_Data/Task2/COX12mon/TLE234group.csv")
 dt <- dt[-1]
-dt <- dt[, 5:24]
+dt <- dt[, 6:24]
 ## Create a variable indicating 1-year event**
 dt <- within(dt, {
   outcome1yr <- NA
@@ -25,7 +25,7 @@ train <- subset(dt, dt$Group == "Training")
 test <- subset(dt, dt$Group == "Test")
 # dtx <- scale(dt[, c(7)])
 
-# rownames(dt) <- dt[, 1]
+rownames(dt) <- dt[, 5]
 dt <- transform(dt, ID = as.factor(1:nrow(dt)))
 dt <- dt[order(dt$ID), ] # 重排序
 data <- as.matrix(train[7:23])
@@ -88,6 +88,7 @@ pheatmap(data,
 # [分组聚类的热图](https://www.jianshu.com/p/b94449be175a)
 # [组内聚类](https://zhuanlan.zhihu.com/p/363769759)https://zhuanlan.zhihu.com/p/371525576
 library(ComplexHeatmap)
+library(tidyverse)
 # ComplexHeatmap 包并不会对数据进行标准化，为了让图形更好看，我们先手动对数据进行标准化
 head(exp)
 exp <- apply(data, 1, scale)
@@ -138,6 +139,28 @@ p2 <- pheatmap(data,
 plot_list <- list(p1[[4]], p2[[4]])
 
 grid.arrange(arrangeGrob(grobs = plot_list, ncol = 2))
+
+# [R学习|临床相关性热图展示病例临床特征与结局事件之间的相关性](https://mp.weixin.qq.com/s?__biz=MzkzNzMxNjgxMA==&mid=2247487685&idx=1&sn=fe03a6a68d36ebc995449149bab0dd19&chksm=c2900860f5e78176a1531f28f40603eeec0d7aae690b6436f6803297ad23de8fb887be306a3b&mpshare=1&scene=1&srcid=0219CB8H6EBcm5EmcmX8NWXc&sharer_sharetime=1676769225579&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
+dt <- dt %>%
+  arrange(Rel._in_5yrs)
+dt %>% glimpse()
+survdata <- data.frame(row.names = rownames(dt), OS = dt[, 1]) # 产生点注释生存数据
+dt <- dt[, -1] # 其余注释数据
+
+ha <- HeatmapAnnotation(
+  survival_time = anno_points(survdata,
+    size = unit(0.1, "cm"), # 点注释
+    gp = gpar(col = "grey")
+  ), df = dt, # 点注释属性及其他临床特征注释
+  col = list(
+    Sex = c("0" = "#66C2A5", "1" = "#FC8D62"), # 设置部分临床特征注释颜色
+    Event = c("0" = "#A6D854", "1" = "#E78AC3")
+  )
+)
+
+heat <- Heatmap(matrix(nrow = 0, ncol = nrow(dt)), top_annotation = ha)
+heat
+draw(heat, annotation_legend_side = "bottom")
 
 # https://officeguide.cc/r-ggplot2-elegant-tiled-heat-maps-tutorial-examples/
 library(reshape2)
