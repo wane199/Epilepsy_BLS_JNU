@@ -1,11 +1,11 @@
 # https://r-graph-gallery.com/215-the-heatmap-function.html
 rm(list = ls())
 # 读入数据
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group_factor.csv") # , row = 5
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv", row = 5)
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group_factor0.csv") # , row = 5
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor0.csv", row = 5)
 # dt <- read.csv("/media/wane/UNTITLED/BLS-ep-pre/EP/Structured_Data/Task2/COX12mon/TLE234group.csv")
-dt <- dt[-1]
-dt <- dt[, 6:24]
+# dt <- dt[-1]
+dt <- dt[, 5:23]
 ## Create a variable indicating 1-year event**
 dt <- within(dt, {
   outcome1yr <- NA
@@ -105,12 +105,10 @@ mat <- dist(data)
 hclust_mat <- hclust(mat)
 hclust_mat$order
 hclust_mat$labels
-
 # reorder row_clust
 index <- seq(1, 171, by = 1)
 hclust_mat$order <- index
 pheatmap(data, cluster_rows = hclust_mat, scale = "column", cluster_row = F, cluster_col = FALSE, fontsize = 6, display_numbers = TRUE)
-
 require(gridExtra)
 
 # reorder 1
@@ -134,7 +132,6 @@ p2 <- pheatmap(data,
   cluster_rows = row_cluster,
   show_colnames = FALSE
 )
-
 # extract plot list
 plot_list <- list(p1[[4]], p2[[4]])
 
@@ -146,15 +143,19 @@ dt <- dt %>%
 dt %>% glimpse()
 survdata <- data.frame(row.names = rownames(dt), OS = dt[, 1]) # 产生点注释生存数据
 dt <- dt[, -1] # 其余注释数据
-
+# 用for循环语句将数值型变量转为因子变量
+for (i in names(dt)[c(1:18)]) {
+  dt[, i] <- as.factor(dt[, i])
+}
+str(dt)
 ha <- HeatmapAnnotation(
   survival_time = anno_points(survdata,
     size = unit(0.1, "cm"), # 点注释
     gp = gpar(col = "grey")
   ), df = dt, # 点注释属性及其他临床特征注释
   col = list(
-    Sex = c("0" = "#66C2A5", "1" = "#FC8D62"), # 设置部分临床特征注释颜色
-    Event = c("0" = "#A6D854", "1" = "#E78AC3")
+    Sex = c("Female" = "#66C2A5", "Male" = "#FC8D62"), # 设置部分临床特征注释颜色
+    side = c("Left" = "#A6D854", "Right" = "#E78AC3")
   )
 )
 
