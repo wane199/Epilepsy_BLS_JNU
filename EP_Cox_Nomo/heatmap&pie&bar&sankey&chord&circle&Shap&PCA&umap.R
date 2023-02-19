@@ -2,7 +2,7 @@
 rm(list = ls())
 # 读入数据
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group_factor0.csv") # , row = 5
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor0.csv", row = 5)
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv", row = 5)
 # dt <- read.csv("/media/wane/UNTITLED/BLS-ep-pre/EP/Structured_Data/Task2/COX12mon/TLE234group.csv")
 # dt <- dt[-1]
 dt <- dt[, 5:23]
@@ -39,7 +39,7 @@ heatmap(data, Colv = NA, Rowv = NA, scale = "column", col = cm.colors(256))
 heatmap(data, Colv = NA, Rowv = NA, scale = "column", col = terrain.colors(256))
 # 2: Rcolorbrewer palette
 library(RColorBrewer)
-coul <- colorRampPalette(brewer.pal(8, "PiYG"))(25)
+coul <- colorRampPalette(brewer.pal(8, "PiYG"))(256)
 heatmap(data,
   Colv = NA, Rowv = NA, scale = "column",
   cex.axis = 0.5, cex.lab = 2, cex.main = 3, margins = c(10, 10), col = coul
@@ -63,7 +63,7 @@ library(pheatmap)
 set.seed(123)
 train <- train[order(train$Rel._in_5yrs), ] # 重排序
 data <- train[, 7:23]
-pheatmap(data, scale = "column", angle_col = "315", show_rownames = F, cluster_row = F, cluster_col = T, cutree_cols = 2, fontsize = 6, col = cm.colors(100)) -> a # col = colMain
+pheatmap(data, scale = "column", angle_col = "315", show_rownames = F, cluster_row = F, cluster_col = T, cutree_cols = 2, fontsize = 6, col = coul) -> a # col = colMain
 a
 mat_cluster <- data[a$tree_row$order, a$tree_col$order]
 mat_cluster
