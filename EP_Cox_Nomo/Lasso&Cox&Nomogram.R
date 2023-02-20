@@ -987,7 +987,7 @@ options(datadist = "ddist")
 cli <- cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ Lat_radscore + AI_radscore + SGS + Durmon + SE + traumatic_brain_injury,
   x = T, y = T, surv = T, data = train
 )
-full <- cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ Lat_radscore + AI_radscore + SGS + Durmon, x = T, y = T, surv = T, data = train) #  time.inc = 60
+full <- cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ Lat_radscore + AI_radscore + SGS + Durmon, x = T, y = T, surv = T, data = test) # time.inc = 60
 # test$SE <- as.factor(test$SE)
 c_index <- cindex(list("Clinic-PET" = full), # "Rad-clinic" = full
   formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ .,
@@ -1079,12 +1079,12 @@ train$Follow_up_timemon <- as.numeric(as.character(train$Follow_up_timemon))
 # 拟合cox回归
 f1 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ SGS + familial_epilepsy + Durmon + SE, data = train, y = TRUE, x = TRUE)
 f2 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ radscore, data = train, y = TRUE, x = TRUE)
-f3 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train, y = TRUE, x = TRUE)
+f3 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = test, y = TRUE, x = TRUE)
 ### 例如评估两年的ROC及AUC值
 model <- riskRegression::Score(list("Clinic-PET" = f3), # "clinic" = f1, 
-  formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1,
-  data = train,
-  times = c(12), # 24, 36, 48 
+  formula = Surv(Follow_up_timemon, Rel._in_5yrs == 0) ~ 1,
+  data = test,
+  times = c(36), # 24, 36, 48 
   plots = "roc",
   metrics = "auc"
 )
@@ -1102,11 +1102,13 @@ plotROC(model,
   legend = c("Clinic model", "Radscore_clinc model")
 )
 # 也可绘制校准曲线(https://mp.weixin.qq.com/s?__biz=MzU4OTc0OTg2MA==&mid=2247494081&idx=1&sn=18a2cf98d09ae4d73d1bbd9719f4d239&chksm=fdca62cacabdebdc593c44459933f17480ac5e11a3bf71a5c1b6b4e529b569d0dadc6673aef1&mpshare=1&scene=1&srcid=10214qI37ajpAIJcmDyKbaxA&sharer_sharetime=1666846938138&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
-model <- riskRegression::Score(list("PET-Clinc" = f3),
-  formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1,
-  data = train, plots = "cal", metrics = "auc"
-)
-plotCalibration(model, bars = T)
+cox <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train, x = 1)
+model <- riskRegression::Score(list("PET-Clinc" = f3), 
+            Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1, 
+            data = train,
+            plots="cal", 
+            metrics='brier')
+plotCalibration(model) #, bars = T
 plotCalibration(model, cens.method = "local", pseudo = 1)
 plotCalibration(model, method = "quantile")
 
@@ -1142,10 +1144,10 @@ pk <- Score(
     model3 = f3
   ),
   formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1,
-  data = train,
+  data = test,
   metrics = "auc",
   null.model = F,
-  times = seq(1, 60, 12)
+  times = seq(1, 60, 11)
 )
 # 2. 画图+展示每个模型每个时间点的auc值
 auc <- plotAUC(pk)
@@ -1193,8 +1195,8 @@ plotROC(pk2,
 
 # Calibration Curve绘制，校准曲线/图，评估模型的拟合优度(Hosmer-Lemeshow),一致性
 ## R语言pec包深度验证Cox模型：pec包函数和rms包中的calibrate()函数原理一致
-calPolt1 <- pec::calPlot(list("Rad-clinic" = full),# "Clinic" = cli,
-  time = 1 * 12, # 设置想要观察的时间点，同理可以绘制其他时间点的曲线
+calPolt1 <- pec::calPlot(list("Clinic-PET" = full),# "Clinic" = cli,
+  time = 5 * 12, # 设置想要观察的时间点，同理可以绘制其他时间点的曲线
   data = test, legend.x = 0.5,
   legend.y = 0.3, legend.cex = 0.8
 )
@@ -1213,12 +1215,12 @@ for (i in names(train)[c(1, 21, 7:18)]) {
   train[, i] <- as.factor(train[, i])
 }
 ## 2 x 5 layout
-layout(matrix(1:6, byrow = T, ncol = 3))
+layout(matrix(1:3, byrow = T, ncol = 3))
 set.seed(123)
 cal1 <- rms::calibrate(full,
   cmethod = "KM",
   method = "boot",
-  u = 12, # u与time.inc一致
+  u = 60, # u与time.inc一致
   m = 57, # m约等于样本量的1/3
   B = 1000
 ) # bootstrap重复次数
@@ -1227,7 +1229,7 @@ plot(cal1,
   lty = 1, # 线段类型
   errbar.col = "blue",
   xlim = c(0, 1), ylim = c(0, 1),
-  xlab = "Nomogram-Predicted Probability of 12-month relapse",
+  xlab = "Nomogram-Predicted Probability of 60-month relapse",
   ylab = "Actual 12-month relapse(proportion)",
   col = "red",
   subtitles = F
@@ -1398,20 +1400,20 @@ train$SGS <- ifelse(train$SGS == "No", 0, 1)
 train$SE <- ifelse(train$SE == "No", 0, 1)
 train$familial_epilepsy <- ifelse(train$familial_epilepsy == "No", 0, 1)
 
-fit <- rms::cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ radscore + SGS + familial_epilepsy + Durmon + SE,
+fit <- rms::cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon,
   data = train
 )
-fit1 <- rms::cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ radscore + SGS + familial_epilepsy + Durmon + SE,
+fit1 <- rms::cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon,
   data = test
 )
 ggrisk(fit1,
-  heatmap.genes = c("radscore", "SE", "Durmon", "SGS", "familial_epilepsy"),
+  heatmap.genes = c("AI_radscore", "Lat_radscore", "Durmon", "SGS"),
   cutoff.value = 0.2, # 可选‘median’, ’roc’ or ’cutoff’
   cutoff.x = 50, cutoff.y = -1,
 ) # “cutoff”文本的水平/垂直位置
 
 ggrisk(fit,
-  heatmap.genes = c("radscore", "SE", "Durmon", "SGS", "familial_epilepsy"),
+  heatmap.genes = c("AI_radscore", "Lat_radscore", "Durmon", "SGS"),
   code.highrisk = "High risk", code.lowrisk = "Low risk", # 低风险标签，默认为 ’Low’
   code.0 = "Relapse-free", code.1 = "Relapse", title.A.ylab = "Risk score", # A图 y轴名称
   title.B.ylab = "Relapse-free time(months)", # B图 y轴名称，注意区分year month day

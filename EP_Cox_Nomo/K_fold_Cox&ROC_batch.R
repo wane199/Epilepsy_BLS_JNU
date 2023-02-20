@@ -62,7 +62,7 @@ auc_value60 <- as.numeric()
 for (i in 1:1000) { # 1000次循环（1000组新数据）
   train <- dt[folds[[i]], ]
   test <- dt[-folds[[i]], ]
-  model <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs) ~ radscore + SGS + familial_epilepsy + Durmon + SE, data = train, x = T)
+  model <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train, x = T)
   mod <- Score(list(model1 = model),
     formula = Surv(Follow_up_timemon, Rel._in_5yrs) ~ 1,
     data = test, metrics = "auc", times = 60
