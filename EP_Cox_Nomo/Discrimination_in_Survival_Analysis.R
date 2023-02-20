@@ -7,7 +7,7 @@ library(rms)
 getwd()
 # dt <- read.csv("./EP/EP_Cox_Nomo/TLE234-rad.csv")
 dt <- read.csv("/home/wane/Desktop/EP/Structured_Data/Task2/TLE234group.csv")
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor0.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv")
 train <- subset(dt, dt$Group == "Training")
 test <- subset(dt, dt$Group == "Test")
 table(dt$Rel._in_5yrs)
@@ -41,26 +41,22 @@ train$Rel._in_5yrs <- factor(train$Rel._in_5yrs,
 )
 survplot(npsurv(S ~ 1, data = train), pval = T)
 survplot(npsurv(S ~ Durmon >= median(Durmon), data = train), label.curves = list(method = "arrow", cex = 1.2), pval = T)
-survplot(npsurv(S ~ familial_epilepsy, data = train), label.curves = list(method = "arrow", cex = 1.2), pval = T)
-survplot(npsurv(S ~ AI_radscore, data = train), state='Relapse', label.curves = list(method = "arrow", cex = 1.2))
-survplot(npsurv(S ~ Lat_radscore, data = train), label.curves = list(method = "arrow", cex = 1.2))
-survplot(npsurv(S ~ Durmon, data = train), label.curves = list(method = "arrow", cex = 1.2))
-survplot(npsurv(S ~ SGS, data = train), label.curves = list(method = "arrow", cex = 1.2))
+survplot(npsurv(S ~ Lat_radscore, data = train), state='Relapse', pval = T, label.curves = list(method = "arrow", cex = 1.2))
 # Kaplan-Meier生存曲线
 library(survminer)
-ggsurvplot(survfit(S ~ SGS, data = train),
+ggsurvplot(survfit(S ~ AI_radscore, data = train),
            # data = train,
-           risk.table = TRUE, conf.int = TRUE,
-           surv.median.line = "hv", # 同时显示垂直和水平参考线
+           risk.table = TRUE, conf.int = TRUE, break.x.by = 12, legend.title = "", # 设置图例标题 legend = c(0.8,0.75), # 指定图例位置
+           # surv.median.line = "hv", # 增加中位生存时间,同时显示垂直和水平参考线
            pval = T, xlab = "months", ylab = "Free of Relapse(%)"
-) -> p4
-p4
+) -> p1
+p1
 library(ggpubr) # 拼图
 ggarrange(plotlist=list(p1$plot,p2$plot,p3$plot,p4$plot),
           labels = c("A", "B","C","D"),
           ncol = 2, nrow = 2) -> p
 plot_grid(p1,p2,p3,p4, labels = "AUTO")
-ggsave("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\uni-KM.pdf", p, width = 20, height = 9, dpi = 900) # 保存为精度为600 dpi的tiff文件
+ggsave("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\uni-KM.pdf", p, width = 18, height = 12, dpi = 900) # 保存为精度为600 dpi的tiff文件
 
 # AUC by logistic regression models
 ## Load epicalc package to calcuate AUC
@@ -361,7 +357,7 @@ IDI.INF.GRAPH(res.IDI.INF)
 # https://www.jianshu.com/p/617db057df37
 coxm0 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ radscore + SGS, data = train)
 coxm1 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ radscore, data = train)
-coxm2 <- survival::coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ radscore + SGS + familial_epilepsy + Durmon + SE, data = train)
+coxm2 <- survival::coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train)
 
 cox.zph(coxm2) # 等比例风险假定
 print(coxm2)
@@ -373,7 +369,7 @@ glmaug
 glmgla <- glance(coxm2)
 glmgla
 library(openxlsx) # 加载R包
-write.xlsx(coxphtable, "/home/wane/Desktop/EP/Structured_Data/Task2/coxphtable.xlsx")
+write.xlsx(coxphtable, "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\coxphtable.xlsx")
 write.xlsx(glmaug, "/home/wane/Desktop/EP/Structured_Data/Task2/glmaug.xlsx")
 write.xlsx(glmgla, "/home/wane/Desktop/EP/Structured_Data/Task2/glmgla.xlsx")
 library(texreg) # 加载R包，texreg包，一个比broom包功能更强的模型统计结果输出包
@@ -385,8 +381,8 @@ screenreg(coxm2,
   single.row = TRUE, # 将 standard errors和系数放在同一行
   ci.force = TRUE
 ) # 将standard errors 替换为置信区间
-htmlreg(list(coxm1, coxm2),
-  file = "/home/wane/Desktop/EP/Structured_Data/Task2/模型输出.doc",
+htmlreg(list(coxm2),
+  file = "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\coxphtable.doc",
   custom.model.names = c("glmmodel", "glmmodel1"), # 修改模型的名字
   digits = 3, # 设置有效数字位数
   single.row = TRUE, # 将 standard errors和系数放在同一行
@@ -397,7 +393,6 @@ htmlreg(list(coxm1, coxm2),
   head.tag = TRUE,
   body.tag = TRUE
 )
-
 
 anova(coxm1)
 summary(coxm2)$concordance # 未校准的时间C-index

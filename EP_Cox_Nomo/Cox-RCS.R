@@ -49,7 +49,7 @@ print(doc, "./EP/EP_Cox_Nomo/supple_zph.docx")
 write.table(zph, "./EP/EP_Cox_Nomo/supple_zph.csv", sep = ",") # result是想保存的变量
 
 ggcoxzph(cox.zph(fit, "rank")) # 可视化等比例假定
-# plot(cox.zph(fit)) # 分图展示
+plot(cox.zph(fit)) # 分图展示
 res_martingale <- residuals(fit, type = "martingale") # dfbetas, score, deviance, partial, schoenfeld
 scatter.smooth(Lat_radscore, res_martingale) # https://www.youtube.com/watch?v=4Edu6Ij7jEM
 

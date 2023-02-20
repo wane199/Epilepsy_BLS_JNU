@@ -204,8 +204,7 @@ auc %>%
 
 # 拼图合并相同图例
 library(patchwork)
-p1 + p2 + p3 + p4 + plot_layout(guides='collect') + plot_annotation(tag_levels = 'A') + theme(legend.position = c(0.98, 0.80),
-                                                                                    legend.justification = c(0.98, 0.80))
+p1 + p2 + p3 + p4 + plot_layout(guides='collect') + plot_annotation(tag_levels = 'A') + theme(legend.position = c(0.98, 0.80),legend.justification = c(0.98, 0.80))
 
 # 拼接pdf文件
 library(qpdf) 
