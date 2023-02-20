@@ -782,14 +782,14 @@ train$Durmon <- ifelse(train$Durmon > 96, 2, 1)
 library(eoffice) # export figure to pptx
 # 调整变量名称
 train <- within(train, {
-  AI_radscore <- factor(AI_radscore, labels = c("low", "high"))
-  Lat_radscore <- factor(Lat_radscore, labels = c("low", "high"))
-  SGS <- factor(SGS, labels = c("no", "yes"))
-  Durmon <- factor(Durmon, labels = c("short", "long"))
+  AI_radscore <- factor(AI_radscore, labels = c("Low", "High"))
+  Lat_radscore <- factor(Lat_radscore, labels = c("Low", "High"))
+  SGS <- factor(SGS, labels = c("No", "Yes"))
+  Durmon <- factor(Durmon, labels = c("Short", "Long"))
 })
 model1 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train) # SGS + Durmon,
 print(model1, data = train)
-p <- ggforest(model1,
+p <- ggforest(model1,fontsize = 1.2,
   main = "Hazard ratio", refLabel = "reference",
   noDigits = 3, # 保留HR值以及95%CI的小数位数
   data = train
@@ -847,7 +847,7 @@ plot(
     lp = F, # naxes=13,
     # force.label=F,
     # col.grid=c("Tomato2","DodgerBlue"),
-    funlabel = c("1-Year Relapse", "3-Year Relapse", "5-Year Relapse"),
+    funlabel = c("12-month Relapse Prob.", "36-month Relapse Prob.", "60-month Relapse Prob."),
     maxscale = 100,
     fun.at = c("0.90", "0.85", "0.80", "0.70", "0.60", "0.50", "0.40", "0.30", "0.20", "0.10")
   ),
@@ -857,7 +857,7 @@ plot(
 plot(
   nomogram(model,
     fun = list(surv1, surv3, surv5),
-    funlabel = c("1-Year Relapse", "3-Year Relapse", "5-Year Relapse"),
+    funlabel = c("12-month Relapse Prob.", "36-month Relapse Prob.", "60-month Relapse Prob."),
     maxscale = 100, lp = F,
     fun.at = c("0.9", "0.8", "0.7", "0.6", "0.5", "0.4", "0.3", "0.2", "0.1")
   ),
@@ -877,7 +877,7 @@ regplot(model1,
 ) # 设置随访时间1年、3年和5年
 
 regplot(model1,
-  observation = train[2, ],
+  observation = train[20, ],points=TRUE,
   failtime = c(12, 36, 60), prfail = TRUE, droplines = T
 )
 
@@ -1082,7 +1082,7 @@ f2 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ radscore, data = train,
 f3 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = test, y = TRUE, x = TRUE)
 ### 例如评估两年的ROC及AUC值
 model <- riskRegression::Score(list("Clinic-PET" = f3), # "clinic" = f1, 
-  formula = Surv(Follow_up_timemon, Rel._in_5yrs == 0) ~ 1,
+  formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1,
   data = test,
   times = c(36), # 24, 36, 48 
   plots = "roc",
@@ -1099,7 +1099,7 @@ plotROC(model,
   pch = 2, # 文字格式
   lwd = 2, # 线粗
   col = "red",
-  legend = c("Clinic model", "Radscore_clinc model")
+  legend = c("Clinic-PET model")
 )
 # 也可绘制校准曲线(https://mp.weixin.qq.com/s?__biz=MzU4OTc0OTg2MA==&mid=2247494081&idx=1&sn=18a2cf98d09ae4d73d1bbd9719f4d239&chksm=fdca62cacabdebdc593c44459933f17480ac5e11a3bf71a5c1b6b4e529b569d0dadc6673aef1&mpshare=1&scene=1&srcid=10214qI37ajpAIJcmDyKbaxA&sharer_sharetime=1666846938138&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
 cox <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train, x = 1)
@@ -1238,12 +1238,12 @@ plot(cal1,
 abline(0, 1, lty = 3, lwd = 2, col = "black")
 
 full3 <- cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon,
-  x = T, y = T, surv = T, data = test, time.inc = 12
+  x = T, y = T, surv = T, data = test, time.inc = 60
 )
 cal2 <- rms::calibrate(full3,
   cmethod = "KM",
   method = "boot",
-  u = 12, # u与time.inc一致
+  u = 60, # u与time.inc一致
   m = 28,
   B = 200
 )
@@ -1252,7 +1252,7 @@ plot(cal2,
   lty = 1,
   errbar.col = "blue",
   xlim = c(0, 1), ylim = c(0, 1),
-  xlab = "Nomogram-Predicted Probability of 36-month relapse",
+  xlab = "Nomogram-Predicted Probability of 60-month relapse",
   ylab = "Actual 36-month relapse(proportion)",
   col = "red",
   subtitles = F

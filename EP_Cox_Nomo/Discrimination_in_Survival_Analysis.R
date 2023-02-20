@@ -401,10 +401,10 @@ summary(coxm2)$concordance # 未校准的时间C-index
 library(corrplot)
 str(train)
 train$Rel._in_5yrs <- as.numeric(as.character(train$Rel._in_5yrs))
-for (i in names(train)[c(7:9, 11)]) {
+for (i in names(train)[c(8:9, 11:24)]) {
   train[, i] <- as.numeric(train[, i])
 }
-dfc <- train[, names(train) %in% c("radscore", "SGS", "familial_epilepsy", "Durmon", "SE")]
+dfc <- train[, names(train) %in% c("AI_radscore", "Lat_radscore","SGS", "Durmon")]
 corrplor <- cor(as.matrix(dfc))
 corrplot.mixed(corrplor, insig = "p-value")
 res1 <- cor.mtest(dfc, conf.level = .95)
