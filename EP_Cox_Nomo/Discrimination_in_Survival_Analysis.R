@@ -7,8 +7,7 @@ library(rms)
 getwd()
 # dt <- read.csv("./EP/EP_Cox_Nomo/TLE234-rad.csv")
 dt <- read.csv("/home/wane/Desktop/EP/Structured_Data/Task2/TLE234group.csv")
-dt <- read.csv("/Users/mac/Desktop/BLS-ep-pre/EP/Structured_Data/Task2/TLE234group.csv")
-
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor0.csv")
 train <- subset(dt, dt$Group == "Training")
 test <- subset(dt, dt$Group == "Test")
 table(dt$Rel._in_5yrs)
@@ -31,17 +30,37 @@ S <- Surv(train$Follow_up_timemon, train$Rel._in_5yrs)
 
 # Kaplan-Meier plots
 par(mar = c(3, 3, 2, 2))
-layout(matrix(1:6, byrow = T, ncol = 2))
+layout(matrix(1:4, byrow = T, ncol = 2))
 train$Sex <- factor(train$Sex,
   levels = c(0, 1),
   labels = c("F", "M")
 )
+train$Rel._in_5yrs <- factor(train$Rel._in_5yrs,
+                    levels = c("Relapse-free", "Relapse"),
+                    labels = c("0", "1")
+)
 survplot(npsurv(S ~ 1, data = train), pval = T)
 survplot(npsurv(S ~ Durmon >= median(Durmon), data = train), label.curves = list(method = "arrow", cex = 1.2), pval = T)
 survplot(npsurv(S ~ familial_epilepsy, data = train), label.curves = list(method = "arrow", cex = 1.2), pval = T)
+survplot(npsurv(S ~ AI_radscore, data = train), state='Relapse', label.curves = list(method = "arrow", cex = 1.2))
+survplot(npsurv(S ~ Lat_radscore, data = train), label.curves = list(method = "arrow", cex = 1.2))
+survplot(npsurv(S ~ Durmon, data = train), label.curves = list(method = "arrow", cex = 1.2))
 survplot(npsurv(S ~ SGS, data = train), label.curves = list(method = "arrow", cex = 1.2))
-survplot(npsurv(S ~ SE, data = train), label.curves = list(method = "arrow", cex = 1.2))
-survplot(npsurv(S ~ radscore >= median(radscore), data = train), label.curves = list(method = "arrow", cex = 1.2))
+# Kaplan-Meier生存曲线
+library(survminer)
+ggsurvplot(survfit(S ~ SGS, data = train),
+           # data = train,
+           risk.table = TRUE, conf.int = TRUE,
+           surv.median.line = "hv", # 同时显示垂直和水平参考线
+           pval = T, xlab = "months", ylab = "Free of Relapse(%)"
+) -> p4
+p4
+library(ggpubr) # 拼图
+ggarrange(plotlist=list(p1$plot,p2$plot,p3$plot,p4$plot),
+          labels = c("A", "B","C","D"),
+          ncol = 2, nrow = 2) -> p
+plot_grid(p1,p2,p3,p4, labels = "AUTO")
+ggsave("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\uni-KM.pdf", p, width = 20, height = 9, dpi = 900) # 保存为精度为600 dpi的tiff文件
 
 # AUC by logistic regression models
 ## Load epicalc package to calcuate AUC

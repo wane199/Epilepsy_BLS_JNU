@@ -24,7 +24,7 @@ library(My.stepwise)
 dt <- read.csv("/home/wane/Desktop/EP/sci/cph/cph2/Test_MRIneg-78_CSB.csv")
 dt <- read.csv("/Users/mac/Desktop/BLS-ep-pre/EP/sci/cph/TLE234group_factor.csv")
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv")
 
 table(dt$Freq)
 dt <- dt[c(-1:-3)]
@@ -931,7 +931,7 @@ shinyPredict(
 # Concordance index(未校准的时间C-index)
 f01 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ ., data = train)
 f01 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, # SE + side,
-  x = T, data = train
+  x = T, data = test
 )
 print(f01)
 sum.surv <- summary(f01)
@@ -994,7 +994,7 @@ full <- cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ Lat_radscore + AI_radsc
   x = T, y = T, surv = T, data = train
 ) #  time.inc = 60
 # test$SE <- as.factor(test$SE)
-c_index <- cindex(list("Clinic" = cli), # "Rad-clinic" = full
+c_index <- cindex(list("Clinic-PET" = full), # "Rad-clinic" = full
   formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ .,
   data = train,
   eval.times = seq(12, 5 * 12, 12)
@@ -1089,10 +1089,10 @@ f1 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ SGS + familial_epilepsy
 f2 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ radscore, data = train, y = TRUE, x = TRUE)
 f3 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train, y = TRUE, x = TRUE)
 ### 例如评估两年的ROC及AUC值
-model <- riskRegression::Score(list("clinic" = f1, "rad-clinic" = f3),
+model <- riskRegression::Score(list("Clinic-PET" = f3), # "clinic" = f1, 
   formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1,
-  data = test,
-  times = c(12, 24, 36),
+  data = train,
+  times = c(12, 24, 36, 48),
   plots = "roc",
   metrics = "auc"
 )
@@ -1110,9 +1110,9 @@ plotROC(model,
   legend = c("Clinic model", "Radscore_clinc model")
 )
 # 也可绘制校正曲线(https://mp.weixin.qq.com/s?__biz=MzU4OTc0OTg2MA==&mid=2247494081&idx=1&sn=18a2cf98d09ae4d73d1bbd9719f4d239&chksm=fdca62cacabdebdc593c44459933f17480ac5e11a3bf71a5c1b6b4e529b569d0dadc6673aef1&mpshare=1&scene=1&srcid=10214qI37ajpAIJcmDyKbaxA&sharer_sharetime=1666846938138&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
-model <- riskRegression::Score(list("Clinc-Rad" = f3),
+model <- riskRegression::Score(list("PET-Clinc" = f3),
   formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1,
-  data = test, plots = "cal", metrics = "auc"
+  data = train, plots = "cal", metrics = "auc"
 )
 plotCalibration(model, bars = T)
 plotCalibration(model, cens.method = "local", pseudo = 1)
@@ -1145,12 +1145,12 @@ plotROC(pk1,
 # 时间AUC
 pk <- Score(
   list(
-    model1 = f1,
-    model2 = f2,
+    # model1 = f1,
+    # model2 = f2,
     model3 = f3
   ),
   formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1,
-  data = test,
+  data = train,
   metrics = "auc",
   null.model = F,
   times = seq(1, 36, 6)
@@ -1208,7 +1208,7 @@ calPolt1 <- pec::calPlot(list("Clinic" = cli, "Rad-clinic" = full),
 )
 print(calPolt1) ## 查看内容
 
-calPolt2 <- pec::calPlot(list("Clinic" = cli, "Rad-clinic" = full),
+calPolt2 <- pec::calPlot(list("Clinic-PET" = full), # "Clinic" = cli, 
   time = 3 * 12, # 设置想要观察的时间点
   data = test, legend.x = 0.5,
   legend.y = 0.3, legend.cex = 0.8,
@@ -1392,6 +1392,11 @@ ggplot(fig1, linetype = F, lwd = 1.2) +
     label = c("模型1", "ALL", "None")
   ) +
   labs(title = "3 years DCA")
+
+library(patchwork) # 拼图
+p1 + p2 + p3 + p4 + p5 + p6 + plot_annotation(tag_levels = "A") +   plot_layout(ncol = 3) + plot_layout(guides = "collect") -> p
+p
+ggsave("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\ROC-Cali_DCA.pdf", p, width = 20, height = 9, dpi = 900) # 保存为精度为600 dpi的tiff文件
 
 # riskplot绘制
 # https://cloud.tencent.com/developer/article/1765625
