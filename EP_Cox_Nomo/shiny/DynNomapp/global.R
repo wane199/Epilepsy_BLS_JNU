@@ -5,6 +5,7 @@ library(stargazer)
 library(compare)
 library(prediction)
 library(survival)
+library(shinythemes)
 
 #######################################################
 #### Before publishing your dynamic nomogram:
