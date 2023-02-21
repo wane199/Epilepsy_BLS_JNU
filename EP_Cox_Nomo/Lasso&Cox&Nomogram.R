@@ -882,7 +882,7 @@ regplot(model1,
 )
 
 library(VRPM)
-fit <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ radscore + SGS + familial_epilepsy + Durmon + SE,
+fit <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon,
   data = train,
   model = TRUE
 )
