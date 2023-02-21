@@ -907,6 +907,7 @@ DynNom(fit, train)
 # 设置参数covariate = "numeric"，可以将动态列线图中变量的调整方式从滑块改为输入
 # 生成本地DynNomapp脚本文件
 setwd("C:\\Users\\wane1\\Documents\\rdocu\\git\\Epilepsy_BLS_JNU\\EP_Cox_Nomo\\shiny\\")
+setwd("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\")
 DNbuilder(fit) ## 生成下图文件于工作目录处
 
 library(shinyPredict)
