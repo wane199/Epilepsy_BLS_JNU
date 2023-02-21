@@ -789,7 +789,7 @@ train <- within(train, {
 })
 model1 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train) # SGS + Durmon,
 print(model1, data = train)
-p <- ggforest(model1,fontsize = 1.2,
+p <- ggforest(model1, fontsize = 1.2,
   main = "Hazard ratio", refLabel = "reference",
   noDigits = 3, # 保留HR值以及95%CI的小数位数
   data = train
@@ -855,13 +855,13 @@ plot(
 )
 # 画上参考线
 plot(
-  nomogram(model,
+  nomogram(model, 
     fun = list(surv1, surv3, surv5),
     funlabel = c("12-month Relapse Prob.", "36-month Relapse Prob.", "60-month Relapse Prob."),
     maxscale = 100, lp = F,
     fun.at = c("0.9", "0.8", "0.7", "0.6", "0.5", "0.4", "0.3", "0.2", "0.1")
   ),
-  col.grid = c("pink", "cyan")
+  col.grid = c("pink", "cyan"),cex.axis=1.2,cex.lab=1.0,cex.var = 1.5,
 )
 # 常见列线图的绘制及自定义美化详细教程 https://mp.weixin.qq.com/s?__biz=MzU4OTc0OTg2MA==&mid=2247497910&idx=1&sn=350a4d6c689462d7337e04455912c8ce&chksm=fdca73bdcabdfaab401fab2a00a9a24a60e7e706675b774bd3d866f6c884cfc80c7a478e7403&mpshare=1&scene=1&srcid=0607mDKXD346ABXXHRc5Sn6I&sharer_sharetime=1660988218815&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd
 # maxscale 参数指定最高分数，一般设置为100或者10分
@@ -906,7 +906,7 @@ DynNom(fit, train)
 # covariate = c("slider", "numeric")
 # 设置参数covariate = "numeric"，可以将动态列线图中变量的调整方式从滑块改为输入
 # 生成本地DynNomapp脚本文件
-setwd("/home/wane/Documents/EP_code/git/Presentation/EP/EP_Cox_Nomo/")
+setwd("C:\\Users\\wane1\\Documents\\rdocu\\git\\Epilepsy_BLS_JNU\\EP_Cox_Nomo\\shiny\\")
 DNbuilder(fit) ## 生成下图文件于工作目录处
 
 library(shinyPredict)
