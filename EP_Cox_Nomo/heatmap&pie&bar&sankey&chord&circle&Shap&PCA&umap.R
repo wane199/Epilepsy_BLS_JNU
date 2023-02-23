@@ -1,7 +1,7 @@
 # https://r-graph-gallery.com/215-the-heatmap-function.html
 rm(list = ls())
 # 读入数据
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group_factor0.csv") # , row = 5
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor0.csv") # , row = 5
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv", row = 5)
 # dt <- read.csv("/media/wane/UNTITLED/BLS-ep-pre/EP/Structured_Data/Task2/COX12mon/TLE234group.csv")
 # dt <- dt[-1]
@@ -290,7 +290,7 @@ ggplot(x.melt, aes(x = sub, y = variable)) +
 
 ####################################
 # pie charts
-plot(dt[7:23]) # library
+plot(dt[6:24]) # library
 library(ggplot2)
 library(dplyr)
 library(ggsci)
@@ -545,8 +545,14 @@ train$DurMonth <- cut(train$Durmon, breaks = c(-Inf, 108.00, Inf), labels = c("0
 test$Rad <- cut(test$radscore, breaks = c(-Inf, 0.1834, Inf), labels = c("0", "1"), right = TRUE, include.lowest = TRUE)
 test$DurMonth <- cut(test$Durmon, breaks = c(-Inf, 108.00, Inf), labels = c("0", "1"), right = TRUE, include.lowest = TRUE)
 
-dt_re1 <- melt(dt[c(1, 4, 5, 6, 7, 12, 14:15, 17)], id = c("ID"))
+dt_re1 <- melt(dt[c(5,7:16,24)], id = c("ID"))
 dt_re1$value <- as.factor(dt_re1$value)
+dt_re1 <- transform(dt_re1,
+                    value = factor(value, rev(levels(value))))# 响应变量因子化，反转层级
+library(RColorBrewer)
+# Define the number of colors you want
+nb.cols <- 18
+mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(nb.cols)
 ggplot(
   dt_re1,
   aes(
@@ -554,15 +560,20 @@ ggplot(
     fill = value, label = value
   )
 ) +
-  scale_fill_brewer(type = "qual", palette = "Set2") +
+  # scale_fill_brewer(type = "qual", palette = "Set3") +  
+  scale_fill_manual(values = mycolors) +
+  scale_x_discrete(expand = c(.1, .1)) + 
   geom_flow(
     stat = "alluvium", lode.guidance = "frontback",
     color = "darkgray"
   ) +
-  geom_stratum() +
+  # geom_alluvium(aes(fill=Rel.in_5yrs)) + 
+  geom_stratum(alpha = .5) +
+  geom_text(stat = "stratum", size = 3, aes(label = after_stat(stratum)), reverse = FALSE) + # 显示分类标签
   theme_classic() +
   theme(legend.position = "bottom") +
   ggtitle("")
+
 
 train_re1 <- melt(train[c(4, 6, 14:15, 17, 23, 24)], id = c("ID"))
 train_re1$value <- as.factor(train_re1$value)
@@ -608,9 +619,9 @@ library(Hmisc)
 # 读取数据
 # rt <- read.csv(file.choose(), header = T)
 rownames(train) <- train[, 4]
-rt <- as.matrix(train[c(6, 7, 12, 14:15, 17)])
+rt <- as.matrix(train[c(6:8, 13, 16)])
 rownames(test) <- test[, 4]
-rt1 <- as.matrix(test[c(6, 7, 12, 14:15, 17)])
+rt <- as.matrix(test[c(6:8, 13, 16)])
 
 # 计算指标间相关性
 cor1 <- cor(rt)
