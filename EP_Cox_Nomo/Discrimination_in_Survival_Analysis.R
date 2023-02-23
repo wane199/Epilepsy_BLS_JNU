@@ -414,25 +414,30 @@ corrplot(corrplor,
 )
 data.frame(corrplor)
 library(GGally)
+# dfc$AI_radscore <- as.factor(dfc$AI_radscore)
+for (i in names(dfc)[c(1:4)]) {
+  dfc[, i] <- as.factor(dfc[, i])
+}
 ggpairs(dfc)
 library(bruceR)
-par(margin(2, 2, 1, 1))
+par(font.lab = 2, mfrow = c(2, 1), mar = c(4.5, 5, 3, 2))
+Corr(dfc,fontsize = 1.2)
 Corr(dfc,
   plot.color.levels = 50, p.adjust = "none",
   all.as.numeric = TRUE,
-  digits = 2,
+  digits = 3,
   plot.file = NULL,
   plot.width = 18,
   plot.height = 16,
-  plot.dpi = 600
-) + theme(
+  plot.dpi = 900
+) + theme(fontsize = 1.2,
   cl.ratio = 0.5, title = element_text(
-    family = "myFont", size = 12, color = "red",
+    family = "myFont", size = 10, color = "red",
     face = "italic", hjust = 0.2, lineheight = 0.2
   ),
   axis.title.x = element_text(size = 10, face = "bold", color = "blue", hjust = 0.5),
   axis.title.y = element_text(size = 14, color = "green", hjust = 0.5, angle = 45),
-  axis.text.x = element_text(family = "myFont", size = 8, color = "red")
+  axis.text.x = element_text(family = "myFont", size = 6, color = "red")
 )
 
 vif <- rms::vif(coxm2) # 检测共线性

@@ -287,15 +287,16 @@ reportROC(
 
 # [利用timeROC包绘制多分类多条ROC曲线](https://mp.weixin.qq.com/s?__biz=MzkyODIyOTY5Ng==&mid=2247485325&idx=2&sn=9e87a03c95f6d6d7733221f943e59441&chksm=c21ab7a2f56d3eb439d5c6e3821ca7101255021f7b49166f8bf32d186485bb146c5a8d89b1ba&mpshare=1&scene=1&srcid=1019d64aFsP83P9MWOGnNUpN&sharer_sharetime=1666136506398&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
 # [多个时间点及多指标ROC曲线](https://zhuanlan.zhihu.com/p/453214424)
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv")
+summary(dt)
 train <- subset(dt, dt$Group == "Training")
 test <- subset(dt, dt$Group == "Test")
-dt <- read.csv("/Users/mac/Downloads/glioma1.csv")
-summary(dt)
 
 table(dt$oneyr)
-train <- train[4:19]
+train <- train[6:24]
 library(survminer)
 library(timeROC)
+options(digits = 3) # 限定输出小数点后数字的位数为3位
 # 绘制ROC图：
 # 颜色
 bioCol <- rainbow(ncol(train) - 2, 0.4)
@@ -303,8 +304,8 @@ bioCol <- rainbow(ncol(train) - 2, 0.4)
 aucText <- c()
 # outFile="ROC.pdf"
 # pdf(file=outFile,width=6,height=6)
-i <- 2
-ROC_train <- timeROC(T = train$Follow_up_timemon, delta = train$oneyr, marker = train[, i], cause = 1, weighting = "aalen", times = c(12), ROC = TRUE)
+i <- 3
+ROC_train <- timeROC(T = train$Follow_up_timemon, delta = train$Rel._in_5yrs, marker = train[, i], cause = 1, weighting = "aalen", times = c(12,36,60), ROC = TRUE)
 print(ROC_train)
 plot(ROC_train, time = 12, col = bioCol[i - 2], title = FALSE, lwd = 2)
 aucText <- c(paste0(colnames(train)[i], ", AUC=", sprintf("%.3f", ROC_train$AUC[2])))
@@ -324,16 +325,16 @@ roc$AUC
 # 构建一个空数据框，用来存贮循环的数据
 outTab <- data.frame()
 
-for (i in colnames(train[, 7:ncol(train)]))
-{
-  roc <- survivalROC(Stime = train$Follow_up_timemon, status = train$Rel._in_5yrs, marker = train[, i], predict.time = 24, method = "KM")
-  if (roc$AUC > 0.55) {
-    outTab <- rbind(outTab, cbind(gene = i, AUC = roc$AUC))
+for (i in colnames(train[, 3:ncol(train)])){
+    roc <- survivalROC(Stime = train$Follow_up_timemon, status = train$Rel._in_5yrs, marker = train[, i], predict.time = c(60), method = "KM")
+    if (roc$AUC > 0.55) {
+      outTab <- rbind(outTab, cbind(gene = i, AUC = roc$AUC))
   }
 }
 
+write.csv(outTab,"C:\\Users\\wane1\\Documents\\file\\sci\\cph\\AUC_60.csv", row.names = FALSE)
 # 排序提取列
-train %>% dplyr::select(5, 6, all_of("radscore"))
+# train %>% dplyr::select(5, 6, all_of("Lat_radscore"))
 
 plot(roc$FP, roc$TP,
   type = "l", xlim = c(0, 1), ylim = c(0, 1),
