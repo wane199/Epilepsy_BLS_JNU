@@ -552,7 +552,7 @@ dt_re1 <- transform(dt_re1,
 library(RColorBrewer)
 # Define the number of colors you want
 nb.cols <- 18
-mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(nb.cols)
+mycolors <- colorRampPalette(brewer.pal(8, "Set3"))(nb.cols)
 ggplot(
   dt_re1,
   aes(
