@@ -22,7 +22,7 @@ library(My.stepwise)
 # 读取数据集
 write.csv(dt,"C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
 dt <- read.csv("/home/wane/Desktop/EP/sci/cph/cph2/Test_MRIneg-78_CSB.csv")
-dt <- read.csv("/Users/mac/Desktop/BLS-ep-pre/EP/sci/cph/TLE234group_factor.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
 # dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv")
 
@@ -609,8 +609,7 @@ for (i in names(train)[c(-1:-6, -7, -10:-12)]) {
 
 ddist <- datadist(train) # 数据打包
 options(datadist = "ddist")
-
-# 输出单因素和多因素结果
+# 输出单因素和多因素结果(医学统计与R语言：扔掉多余制表工具，用finalfit吧)
 library(finalfit)
 str(train)
 train["Follow_up_timemon"] <- lapply(train["Follow_up_timemon"], FUN = function(y) {
@@ -641,22 +640,22 @@ knitr::kable(t1, align = c("l", "l", "r", "r", "r"), "simple")
 write.csv(t1, "/media/wane/wade/EP/EPTLE_PET/final_train.csv", row.names = F)
 
 # 指定自变量
-explanatory <- unlist(colnames(train)[c(-1:-6)])
+explanatory <- unlist(colnames(train)[c(-1:-7)])
 # 指定因变量
 train$Rel._in_5yrs <- as.numeric(train$Rel._in_5yrs) # 拟合cox回归需要转为数值变量
 dependent <- "Surv(Follow_up_timemon, Rel._in_5yrs)"
 # 拟合和输出结果
 train %>%
-  finalfit(dependent, explanatory,
+  finalfit(dependent, explanatory,digits=3,
     metrics = T, # metrics=T表示输出模型检验的指标
     add_dependent_label = F
   ) -> t2 # add_dependent_label=F表示不在表的左上角添加因变量标签。
 knitr::kable(t2, "simple")
-write.csv(t2, "/home/wane/Desktop/EP/sci/cph/table2_2019.csv", row.names = F)
+write.csv(t2, "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\table2-1.csv", row.names = F)
 
 # hr_plot()生成Cox比例风险模型的风险比表和图, or_plot用于从glm()或lme4::glmer()模型中生成一个OR值表和图。
 # https://mp.weixin.qq.com/s?__biz=MzIzMzc1ODc4OA==&mid=2247485564&idx=1&sn=db5b0e544afa6f09e89d8c4606e21659&chksm=e8818157dff60841de4e60cc25785defca31241f2342d6b6a1b705151b6cbe7e023bfbd44aaa&mpshare=1&scene=1&srcid=0205aGisjDzv3Rrn1Raq1gUL&sharer_sharetime=1660926034730&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd
-explanatory <- unlist(colnames(dt)[c(-1:-6)])
+explanatory <- unlist(colnames(dt)[c(-1:-7)])
 train %>%
   hr_plot(dependent, explanatory)
 
@@ -699,11 +698,11 @@ results <- ezcox(train,
 )
 results
 knitr::kable(results, "latex")
-write.csv(results, "/home/wane/Desktop/EP/sci/cph/results2019.csv", row.names = FALSE)
+write.csv(results, "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\Table2-0.csv", row.names = FALSE)
 
 show_forest(train,
   time = "Follow_up_timemon", status = "Rel._in_5yrs",
-  covariates = unlist(colnames(train)[c(-1:-6)]), controls = "AI_radscore"
+  covariates = unlist(colnames(train)[c(-1:-7)]), controls = "MRI"
 )
 
 # Stepwise筛选变量
@@ -755,7 +754,6 @@ train$rad <- factor(train$rad,
   labels = c("Low", "High")
 )
 # 拟合cox回归
-# coxm1 <- cph(Surv(Follow_up_timemon,Rel._in_5yrs==1) ~ Radscore, x=T,y=T,data=train,surv=T)
 coxm0 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ SGS + familial_epilepsy + Durmon + SE + Surgmon, data = test)
 train <- train[-8]
 coxm1 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ ., data = train)
@@ -1606,7 +1604,9 @@ dt <- dt %>%
 
 novelscore <- as.data.frame(dt["novelscore"])
 hist(dt$novelscore)
-dt$Rel._in_5yrs <- factor(dt$Rel._in_5yrs)
+# dt$Rel._in_5yrs <- factor(dt$Rel._in_5yrs)
+dt$Rel._in_5yrs <- as.numeric(as.character(dt$Rel._in_5yrs))
+str(dt)
 library(cutoff)
 cox(
   data = dt,
@@ -1660,7 +1660,7 @@ ggsurvplot(fit,
   conf.int = T, pval = T,
   palette = c("#E7B800", "#2E9FDF"),
   legend.labs = c("novelscore-low", "novelscore-high"),
-  xlab = "Follow-up time(months)", ylab = "Cum Relapse"
+  xlab = "Follow-up time(months)", ylab = "Cum Relapse(%)"
 )
 
 library(reportROC)
@@ -1668,23 +1668,36 @@ reportROC(gold = dt$Rel._in_5yr, predictor = dt$novelscore, important = "se", pl
 reportROC(gold = res.cat$Rel._in_5yr, predictor.binary = res.cat$novelscore, important = "se", plot = TRUE)
 reportROC(gold = dt$Rel._in_5yr, predictor.binary = binary[1:50], exact = FALSE)
 
+dt$novelscore <- cut(dt$novelscore, breaks = c(-Inf, 7.18, Inf), labels = c("1", "2"), right = FALSE)
 # C-index
-f<-coxph(Surv(Months,Status==1)~Age_group+Pathologic_stage+PgR,
-         data breast)
+f <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs==1) ~ novelscore,
+         data = dt)
 sum.surv<-summary(f)
 c_index<-sum.surv$concordance
 c_index
 
-#Calibration curve
-cal<-calibrate(coxm,cmethod 'KM',method 'boot',u 60,m
-               100,B=100)
-plot(cal,lwd=2,lty=1,errbar.col=c(rgb(0,118,192,maxColorValue=255)),
-     xlim=c(0.6,1),ylim=c(0.6,1),xlab='Nomogram-Predicted
-Probability of 5-Year OS',ylab='Actual 5-Year OS(proportion)',
-     col=c(rgb(192,98,83,maxColorValue=255)))
-lines(cal[,c('mean.predicted','KM')]type='b',lwd=2,
-      col=c(rgb(192,98,83,maxColorValue=255)),pch=16)
-abline(0,1,lty=3,1wd=2,col=c(rgb(0,118,192,maxColorValue=255)))
+# Calibration curve
+ddist <- datadist(dt)
+options(datadist = "ddist")
+full <- rms::cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ novelscore, x=T,y=T, surv=TRUE, data = dt)
+cal <- rms::calibrate(full,
+                       cmethod = "KM",
+                       method = "boot",
+                       u = 36, # u与time.inc一致
+                       m = 28,
+                       B = 200
+)
+plot(cal,
+     lwd = 2,
+     lty = 1,
+     errbar.col = "blue",
+     xlim = c(0, 1), ylim = c(0, 1),
+     xlab = "Nomogram-Predicted Probability of 60-month relapse",
+     ylab = "Actual 60-month relapse(proportion)",
+     col = "red",
+     subtitles = F
+)
+abline(0, 1, lty = 3, lwd = 2, col = "black")
 
 
 # 交叉验证与重抽样, 重复论证

@@ -7,7 +7,7 @@ library(rms)
 getwd()
 # dt <- read.csv("./EP/EP_Cox_Nomo/TLE234-rad.csv")
 dt <- read.csv("/home/wane/Desktop/EP/Structured_Data/Task2/TLE234group.csv")
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor0.csv")
 train <- subset(dt, dt$Group == "Training")
 test <- subset(dt, dt$Group == "Test")
 table(dt$Rel._in_5yrs)
@@ -25,6 +25,7 @@ test <- dt[ind == 2, ] # the test data set
 
 ddist <- datadist(train)
 options(datadist = "ddist")
+train$Rel._in_5yrs <- ifelse(train$Rel._in_5yrs=="Relapse",1,0)
 train$Rel._in_5yrs <- as.numeric(as.character(train$Rel._in_5yrs))
 S <- Surv(train$Follow_up_timemon, train$Rel._in_5yrs)
 
@@ -225,7 +226,7 @@ risksetAUC.rad.clinic <- with(
     tmax = 5 * 12
   )
 )
-title(sprintf("t = %.0f, iAUC = %.2f", 5 * 12, risksetAUC.rad.clinic$Cindex))
+title(sprintf("t = %.0f, iAUC = %.3f", 5 * 12, risksetAUC.rad.clinic$Cindex))
 
 # Various methods provided survAUC package (Potapov et al)
 library(survAUC)
