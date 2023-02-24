@@ -20,10 +20,10 @@ library(survIDINRI)
 library(My.stepwise)
 
 # 读取数据集
-# write.csv(dt,"/home/wane/Desktop/EP/结构化数据/TableS1-2.csv", row.names = FALSE)
+write.csv(dt,"C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
 dt <- read.csv("/home/wane/Desktop/EP/sci/cph/cph2/Test_MRIneg-78_CSB.csv")
 dt <- read.csv("/Users/mac/Desktop/BLS-ep-pre/EP/sci/cph/TLE234group_factor.csv")
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
+# dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv")
 
 table(dt$Freq)
@@ -550,12 +550,12 @@ ggsurvplot(fit,
   data = res.cat,
   risk.table = TRUE, conf.int = TRUE,
   surv.median.line = "hv", # 同时显示垂直和水平参考线
-  pval = T, xlab = "months", ylab = "Free of Relapse(%)"
+  pval = T, xlab = "Follow-up time(months)", ylab = "Free of Relapse(%)"
 )
 
 ggsurvplot(fit,
   data = train, risk.table = TRUE, conf.int = TRUE,
-  pval = T, xlab = "Time in months", ylab = "Free of Relapse",
+  pval = T, xlab = "Follow-up time(months)", ylab = "Free of Relapse(%)",
   palette = c("#E7B800", "#2E9FDF"), braek.time.by = 12, ggtheme = theme_classic(), risk.table.y.text.col = T,
   risk.table.y.text = F, risk.table.height = 0.25,
   ncensor.plot = T, ncencer.plot.height = 0.25, # conf.int.style="step",
@@ -568,7 +568,7 @@ ggsurvplot(fit,
   conf.int = T, pval = T,
   palette = c("#E7B800", "#2E9FDF"),
   legend.labs = c("Radscore-low", "Radscore-high"),
-  xlab = "Time in months", ylab = "Cum Relapse"
+  xlab = "Follow-up time(months)", ylab = "Cum Relapse(%)"
 )
 
 # radscore及测试集最佳截断值添加至临床资料总表
@@ -665,7 +665,7 @@ train %>%
 fit0 <- survfit(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1, data = train)
 ggsurvplot(fit0,
   plaette = "#2E9FDF", data = train, risk.table = TRUE, surv.median.line = "hv",
-  pval = T, xlab = "Time in months", ylab = "Free of Relapse"
+  pval = T, xlab = "Follow-up time(months)", ylab = "Free of Relapse(%)"
 )
 
 # 绘制累积风险曲线
@@ -673,13 +673,13 @@ ggsurvplot(fit0,
   plaette = "#2E9FDF", data = train, risk.table = TRUE,
   fun = "cumhaz", # 定义生存曲线变换的任意函数，"event"累积事件f(y) = 1-y, "cumhaz"累积风险函数f(y) = -log(y),"pct"生存概率(百分比)。
   conf.int = T, # legend.labs = c("Radscore-low", "Radscore-high"),
-  xlab = "Time in months", ylab = "Cum Relapse"
+  xlab = "Follow-up time(months)", ylab = "Cum Relapse(%)"
 )
 
 fit1 <- survfit(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ Sex, data = train)
 ggsurvplot(fit1,
   plaette = "#2E9FDF", risk.table = TRUE, conf.int = TRUE, surv.median.line = "hv",
-  data = train, pval = T, xlab = "Time in months", ylab = "Free of Relapse"
+  data = train, pval = T, xlab = "Follow-up time(months)", ylab = "Free of Relapse(%)"
 )
 
 # 批量完成单因素Cox回归分析，变量筛选，多种methods
@@ -1170,7 +1170,7 @@ p <- ggplot(data = auc, aes(x = times, y = AUC, color = model)) + # 指定数据
   theme_prism(base_size = 15) + # 使用prism主题
   theme(legend.position = "top") + # 正下方为"bottom"，
   ylim(0.4, 0.9) + # y轴范围
-  labs(x = "Follow-up months", y = "AUC value") + # x，y命名
+  labs(x = "Follow-up time(months)", y = "AUC value") + # x，y命名
   scale_colour_manual(values = cols)
 p # 颜色
 
@@ -1423,7 +1423,7 @@ ggrisk(fit,
   heatmap.genes = c("AI_radscore", "Lat_radscore", "Durmon", "SGS"),
   code.highrisk = "High risk", code.lowrisk = "Low risk", # 低风险标签，默认为 ’Low’
   code.0 = "Relapse-free", code.1 = "Relapse", title.A.ylab = "Risk score", # A图 y轴名称
-  title.B.ylab = "Relapse-free time(months)", # B图 y轴名称，注意区分year month day
+  title.B.ylab = "Free of Relapse(months)", # B图 y轴名称，注意区分year month day
   title.A.legend = "Risk group", title.B.legend = "Status", title.C.legend = "Expression", # C图图例名称
   relative_heights = c(0.1, 0.1, 0.01, 0.15), # A、B、热图注释和热图C的相对高度
   color.A = c(low = "green", high = "red"), color.B = c(code.0 = "green", code.1 = "red"), # B图中点的颜色
@@ -1442,7 +1442,7 @@ two_scatter(fit1,
   code.highrisk = "High Risk",
   code.lowrisk = "Low Risk",
   title.A.ylab = "Risk Score",
-  title.B.ylab = "Free of Relapse(month)",
+  title.B.ylab = "Free of Relapse(months)",
 )
 two_scatter(fit, # cutoff.x = -3,cutoff.y = -2.8,
   cutoff.value = "cutoff"
@@ -1651,7 +1651,7 @@ ggsurvplot(fit,
   data = res.cat,
   risk.table = TRUE, conf.int = TRUE,
   surv.median.line = "hv", # 同时显示垂直和水平参考线
-  pval = T, xlab = "months", ylab = "Free of Relapse(%)"
+  pval = T, xlab = "Follow-up time(months)", ylab = "Free of Relapse(%)"
 )
 # 绘制累积风险曲线
 ggsurvplot(fit,
@@ -1660,13 +1660,31 @@ ggsurvplot(fit,
   conf.int = T, pval = T,
   palette = c("#E7B800", "#2E9FDF"),
   legend.labs = c("novelscore-low", "novelscore-high"),
-  xlab = "Time in months", ylab = "Cum Relapse"
+  xlab = "Follow-up time(months)", ylab = "Cum Relapse"
 )
 
 library(reportROC)
 reportROC(gold = dt$Rel._in_5yr, predictor = dt$novelscore, important = "se", plot = TRUE)
 reportROC(gold = res.cat$Rel._in_5yr, predictor.binary = res.cat$novelscore, important = "se", plot = TRUE)
 reportROC(gold = dt$Rel._in_5yr, predictor.binary = binary[1:50], exact = FALSE)
+
+# C-index
+f<-coxph(Surv(Months,Status==1)~Age_group+Pathologic_stage+PgR,
+         data breast)
+sum.surv<-summary(f)
+c_index<-sum.surv$concordance
+c_index
+
+#Calibration curve
+cal<-calibrate(coxm,cmethod 'KM',method 'boot',u 60,m
+               100,B=100)
+plot(cal,lwd=2,lty=1,errbar.col=c(rgb(0,118,192,maxColorValue=255)),
+     xlim=c(0.6,1),ylim=c(0.6,1),xlab='Nomogram-Predicted
+Probability of 5-Year OS',ylab='Actual 5-Year OS(proportion)',
+     col=c(rgb(192,98,83,maxColorValue=255)))
+lines(cal[,c('mean.predicted','KM')]type='b',lwd=2,
+      col=c(rgb(192,98,83,maxColorValue=255)),pch=16)
+abline(0,1,lty=3,1wd=2,col=c(rgb(0,118,192,maxColorValue=255)))
 
 
 # 交叉验证与重抽样, 重复论证
@@ -1679,7 +1697,7 @@ months <- train$Follow_up_timemon
 relapse <- train$Rel._in_5yrs
 
 x <- as.matrix(train[c("AI_radscore", "Lat_radscore", "SGS", "Durmon")])
-x <- as.matrix(train[c(7:23)])
+x <- as.matrix(train[c(8:24)])
 cbfit <- CoxBoost(
   time = months,
   status = relapse,
@@ -1703,7 +1721,7 @@ cv.res <- cv.CoxBoost(
   time = months,
   status = relapse,
   x = x,
-  maxstepno = 500,
+  maxstepno = 1000,
   K = 10,
   type = "verweij",
   penalty = optim.res$penalty
@@ -1720,8 +1738,8 @@ cbfit <- CoxBoost(
 )
 summary(cbfit)
 
-names <- cbfit$xnames[which(cbfit$coefficients[111, ] != 0)]
-coef <- cbfit$coefficients[111, ][which(cbfit$coefficients[111, ] != 0)]
+names <- cbfit$xnames[which(cbfit$coefficients[62, ] != 0)]
+coef <- cbfit$coefficients[62, ][which(cbfit$coefficients[62, ] != 0)]
 cbind(names, coef)
 
 
