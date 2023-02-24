@@ -94,7 +94,9 @@ library(chest)
 vlist <- c("Lat_radscore", "SGS", "Durmon")
 results <- chest_cox(crude = "Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore", xlist = vlist, data = train)
 chest_plot(results)
-chest_forest(results)
+chest_forest(results,est_lab = "Estimate HR(95% CI)",cex  = 5,
+             cex.axis =2.2,cex.lab = 2.0,cex.var = 2.5,
+             zero = 1, digits = "%.3f")
 
 # rcssci()
 library(rcssci)

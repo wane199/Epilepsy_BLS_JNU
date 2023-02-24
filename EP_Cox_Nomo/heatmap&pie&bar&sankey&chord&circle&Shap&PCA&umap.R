@@ -532,8 +532,8 @@ g + geom_bar(aes(fill = factor(value)), width = 0.5) + coord_flip() + # 转为�
   ) +
   labs(title = "Categorywise Bar Chart", subtitle = "", caption = "Source: Manufacturers from 'TLE' dataset")
 
-# ggalluvial|炫酷桑基图(Sankey)
-# https://cloud.tencent.com/developer/article/1675189
+# ggalluvial|炫酷桑基图(Sankey)(https://cloud.tencent.com/developer/article/1675189)
+# [Alluvial Plots in ggplot2](https://cran.r-project.org/web/packages/ggalluvial/vignettes/ggalluvial.html)
 library(ggalluvial)
 library(reshape)
 library(patchwork)
@@ -568,8 +568,8 @@ ggplot(
     color = "darkgray"
   ) +
   # geom_alluvium(aes(fill=Rel.in_5yrs)) + 
-  geom_stratum(alpha = .5) +
-  geom_text(stat = "stratum", size = 3, aes(label = after_stat(stratum)), reverse = FALSE) + # 显示分类标签
+  geom_stratum(alpha = .25, reverse = FALSE) +
+  geom_text(stat = "stratum", size = 2, aes(label = after_stat(stratum)), reverse = FALSE) + # 显示分类标签
   theme_classic() +
   theme(legend.position = "bottom") +
   ggtitle("")
@@ -624,7 +624,7 @@ rownames(test) <- test[, 4]
 rt <- as.matrix(test[c(6:8, 13, 16)])
 
 # 计算指标间相关性
-cor1 <- cor(rt)
+cor1 <- cor(rt,method = c("pearson"))
 # 显示P值
 rt <- as.matrix(rt)
 p <- rcorr(rt)
@@ -636,12 +636,14 @@ cor1[cor1 == 1] <- 0
 c1 <- ifelse(c(cor1) >= 0, rgb(1, 0, 0, abs(cor1)), rgb(0, 1, 0, abs(cor1)))
 col1 <- matrix(c1, nc = ncol(rt))
 # 绘制和弦图
-par(mar = c(2, 2, 2, 4))
-circos.par(gap.degree = c(3, rep(2, nrow(cor1) - 1)), start.degree = 180)
-chordDiagram(cor1, grid.col = rainbow(ncol(rt)), col = col1, transparency = 0.5, symmetric = T)
-par(xpd = T)
-# colorlegend(col,labels=c(1,0,-1))
-colorlegend(col, vertical = T, labels = c(1, 0, -1), xlim = c(1.1, 1.3), ylim = c(-0.4, 0.4))
+circos.clear()
+circos.par(start.degree = 90, gap.degree = 4, track.margin = c(-0.1, 0.1), points.overflow.warning = FALSE)
+par(mar = rep(0, 4))
+# par(mar = c(2, 2, 2, 4))
+circos.par(gap.degree=c(3,rep(2, nrow(cor1)-1)), start.degree = 180)
+chordDiagram(cor1, grid.col=rainbow(ncol(rt)), col=col1, transparency = 0.5, symmetric = T)
+par(xpd=T)
+colorlegend(col, vertical = T,labels=c(1,0,-1),xlim=c(1.1,1.3),ylim=c(-0.4,0.4))  
 
 # https://www.jianshu.com/p/9477a3405545
 chordDiagram(
@@ -656,8 +658,8 @@ library(viridis)
 library(reshape2)
 
 df <- read.csv("示例数据1.csv", header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
-df_melt <- melt(dt[c(4, 6, 9, 14:22)], id = c("ID"))
-df_melt <- melt(df, id.vars = "Region")
+df <- dt[,5:24]
+df_melt <- melt(dt[c(6:8, 13, 16, 24)], id.vars = c("ID"))
 colnames(df_melt) <- c("from", "to", "value")
 df_melt$to <- as.character(df_melt$to)
 
@@ -665,12 +667,12 @@ df_melt$to <- as.character(df_melt$to)
 df_sum <- apply(df[, 2:ncol(df)], 2, sum) + apply(df[, 2:ncol(df)], 1, sum)
 order <- sort(df_sum, index.return = TRUE, decreasing = TRUE)
 
-df_melt$from <- factor(df_melt$from, levels = df$Region[order$ix], order = TRUE)
+df_melt$from <- factor(df_melt$from, levels = df$ID[order$ix], order = TRUE)
 df_melt <- dplyr::arrange(df_melt, from)
 
 # 颜色主题方案
 mycolor <- viridis(10, alpha = 1, begin = 0, end = 1, option = "D")
-names(mycolor) <- df$Region
+names(mycolor) <- df$ID
 
 circos.clear()
 circos.par(start.degree = 90, gap.degree = 4, track.margin = c(-0.1, 0.1), points.overflow.warning = FALSE)
@@ -718,6 +720,11 @@ circos.trackPlotRegion(
 
 library(eoffice)
 topptx(filename = "和弦图.pptx")
+setEPS()
+postscript("whatever.eps")
+plot(rnorm(100), main="Hey Some Data") # 自己的绘图函数
+dev.off()
+
 
 ##########################################
 # 模型自带的feature importance, 环状柱状图展示；SHAP技术验证，PCA探究SHAP分析中top变量

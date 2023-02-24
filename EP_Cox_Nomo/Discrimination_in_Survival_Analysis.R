@@ -404,12 +404,13 @@ train$Rel._in_5yrs <- as.numeric(as.character(train$Rel._in_5yrs))
 for (i in names(train)[c(8:9, 11:24)]) {
   train[, i] <- as.numeric(train[, i])
 }
-dfc <- train[, names(train) %in% c("AI_radscore", "Lat_radscore","SGS", "Durmon")]
+dfc <- train[, names(train) %in% c("Rel._in_5yrs","AI_radscore", "Lat_radscore","SGS", "Durmon")]
+
 corrplor <- cor(as.matrix(dfc))
 corrplot.mixed(corrplor, insig = "p-value")
 res1 <- cor.mtest(dfc, conf.level = .95)
 corrplot(corrplor,
-  p.mat = res1$p, sig.level = .2, type = "lower",
+  p.mat = res1$p, sig.level = .3, type = "lower",
   insig = "p-value"
 )
 data.frame(corrplor)
@@ -421,7 +422,7 @@ for (i in names(dfc)[c(1:4)]) {
 ggpairs(dfc)
 library(bruceR)
 par(font.lab = 2, mfrow = c(2, 1), mar = c(4.5, 5, 3, 2))
-Corr(dfc,fontsize = 1.2)
+Corr(dfc)
 Corr(dfc,
   plot.color.levels = 50, p.adjust = "none",
   all.as.numeric = TRUE,
@@ -439,6 +440,7 @@ Corr(dfc,
   axis.title.y = element_text(size = 14, color = "green", hjust = 0.5, angle = 45),
   axis.text.x = element_text(family = "myFont", size = 6, color = "red")
 )
+# (https://zhuanlan.zhihu.com/p/114008006)
 
 vif <- rms::vif(coxm2) # 检测共线性
 sqrt(vif) < 2
