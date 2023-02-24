@@ -1408,10 +1408,10 @@ train$SE <- ifelse(train$SE == "No", 0, 1)
 train$familial_epilepsy <- ifelse(train$familial_epilepsy == "No", 0, 1)
 
 fit <- rms::cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon,
-  data = train
+  data = test
 )
 fit1 <- rms::cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon,
-  data = test
+  data = dt
 )
 ggrisk(fit1,
   heatmap.genes = c("AI_radscore", "Lat_radscore", "Durmon", "SGS"),
@@ -1428,7 +1428,7 @@ ggrisk(fit,
   relative_heights = c(0.1, 0.1, 0.01, 0.15), # A、B、热图注释和热图C的相对高度
   color.A = c(low = "green", high = "red"), color.B = c(code.0 = "green", code.1 = "red"), # B图中点的颜色
   color.C = c(low = "green", median = "white", high = "red"), # C图中热图颜色
-  cutoff.value = 0.2, # 可选‘median’, ’roc’ or ’cutoff’
+  cutoff.value = 'roc', # 可选‘median’, ’roc’ or ’cutoff’ 0.19
   vjust.A.ylab = 1, # A图中y轴标签到y坐标轴的距离,默认是1
   vjust.B.ylab = 2 # B图中y轴标签到y坐标轴的距离,默认是2
 )
@@ -1485,7 +1485,6 @@ nricens(
   niter = 100
 )
 # 明确的划分切点适用分类NRI
-
 # IDI计算与绘制
 library(randomForestSRC)
 library(survey)
@@ -1679,8 +1678,8 @@ train$Rel._in_5yrs <- as.factor(train$Rel._in_5yrs)
 months <- train$Follow_up_timemon
 relapse <- train$Rel._in_5yrs
 
-x <- as.matrix(train[c("radscore", "SGS", "SE", "familial_epilepsy", "Durmon")])
-x <- as.matrix(train[c(7:22)])
+x <- as.matrix(train[c("AI_radscore", "Lat_radscore", "SGS", "Durmon")])
+x <- as.matrix(train[c(7:23)])
 cbfit <- CoxBoost(
   time = months,
   status = relapse,
