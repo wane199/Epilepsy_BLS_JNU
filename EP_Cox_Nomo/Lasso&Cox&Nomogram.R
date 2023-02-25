@@ -24,7 +24,7 @@ write.csv(dt,"C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
 dt <- read.csv("/home/wane/Desktop/EP/sci/cph/cph2/Test_MRIneg-78_CSB.csv")
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
 # dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv")
 
 table(dt$Freq)
 dt <- dt[c(-1:-3)]
@@ -798,7 +798,7 @@ topptx(figure = p, filename = "/home/wane/Desktop/EP/sci/cph/forest.pptx")
 library(forplo)
 DT::datatable(train)
 library(autoReg)
-model <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs==1) ~ ., data = train[,6:19,21:24]) 
+model <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs==1) ~ brain_hypoxia, data = train[c(6:19,20,21:24)]) 
 autoReg(model,
   uni = T, threshold = 0.1,
   final = T
