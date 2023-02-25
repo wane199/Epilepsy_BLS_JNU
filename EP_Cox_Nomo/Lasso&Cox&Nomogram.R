@@ -8,7 +8,7 @@ getwd()
 # setwd("/home/wane/Documents/RDocu") ## 设置工作目录
 rm(list = ls())
 list.files() ## 列出工作目录下的文件
-options(digits = 3) # 限定输出小数点后数字的位数为3位
+options(digits = 4) # 限定输出小数点后数字的位数为3位
 library(glmnet) ## Lasso回归、岭回归、弹性网络模型
 library(caret) ## 标准化及混淆矩阵
 library(survival) ## 生存分析包, 包括非参数(Kaplan-Meier分析)和半参数(CPH), 参数模型(参数比例，附加危害，AFT)
@@ -603,7 +603,7 @@ create_report(dt) # 数据EDA分析报告
 
 # 对数据初步预处理(批量单因素分析变量保留数值型变量)
 # 用for循环语句将数值型变量转为因子变量
-for (i in names(train)[c(-1:-6, -7, -10:-12)]) {
+for (i in names(train)[c(-1:-7)]) {
   train[, i] <- as.factor(train[, i])
 }
 
@@ -646,7 +646,7 @@ train$Rel._in_5yrs <- as.numeric(train$Rel._in_5yrs) # 拟合cox回归需要转�
 dependent <- "Surv(Follow_up_timemon, Rel._in_5yrs)"
 # 拟合和输出结果
 train %>%
-  finalfit(dependent, explanatory,digits=3,
+  finalfit(dependent, explanatory, digits=4,
     metrics = T, # metrics=T表示输出模型检验的指标
     add_dependent_label = F
   ) -> t2 # add_dependent_label=F表示不在表的左上角添加因变量标签。
@@ -798,17 +798,18 @@ topptx(figure = p, filename = "/home/wane/Desktop/EP/sci/cph/forest.pptx")
 library(forplo)
 DT::datatable(train)
 library(autoReg)
-autoReg(model1,
+model <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs==1) ~ ., data = train[,6:19,21:24]) 
+autoReg(model,
   uni = T, threshold = 0.1,
   final = T
 ) %>% myft()
-forplo(model1,
+forplo(model,
   font = "Arial",
   sort = T,
   # flipbelow1=T,
   left.align = T,
   ci.edge = T,
-  scaledot.by = abs(coef(model1)),
+  scaledot.by = abs(coef(model)),
   col = "#BAD1C2",
   char = 20,
   shade.every = 1,
@@ -817,7 +818,7 @@ forplo(model1,
 )
 # [Topic 7. 临床预测模型--Cox回归](https://blog.csdn.net/weixin_41368414/article/details/122452355)
 library(forestmodel)
-forest_model(model1,
+forest_model(model,
              theme = theme_forest(),
              factor_separate_line=TRUE
 )
