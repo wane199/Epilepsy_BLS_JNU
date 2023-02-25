@@ -44,12 +44,26 @@ devtools::install_github("lchiffon/wordcloud2")
 # library
 library(wordcloud2)
 head(demoFreq)
-letterCloud(ai, word = "PET", color = "random-light", backgroundColor = "black")
+letterCloud(ai,
+  word = "PET",
+  color = "random-light",
+  backgroundColor = "black"
+)
 ai <- read.csv("./BLS_EP_files/Most_Frequent_Words.csv")
 rownames(ai) <- ai[, 1]
 head(ai)
-letterCloud(ai, word = "PET", color = "random-light", backgroundColor = "pink")
-my_graph <- letterCloud(ai, word = "PET", color = "white", backgroundColor = "pink")
+letterCloud(ai,
+  word = "PET",
+  color = "random-light",
+  backgroundColor = "pink"
+)
+my_graph <-
+  letterCloud(
+    ai,
+    word = "PET",
+    color = "white",
+    backgroundColor = "pink"
+  )
 my_graph
 
 # Export the wordcloud
@@ -68,7 +82,13 @@ library("htmlwidgets")
 saveWidget(my_graph, "./BLS_EP_files/tmp.html", selfcontained = F)
 
 # and in png or pdf
-webshot("./BLS_EP_files/tmp.html", "./BLS_EP_files/fig_1.pdf", delay = 5, vwidth = 480, vheight = 480)
+webshot(
+  "./BLS_EP_files/tmp.html",
+  "./BLS_EP_files/fig_1.pdf",
+  delay = 5,
+  vwidth = 480,
+  vheight = 480
+)
 
 
 ################# Supports image files and graphic objects to be visualized
@@ -76,16 +96,40 @@ require(magick)
 require(ggplot2)
 require(ggimage)
 getwd()
-dt <- read.csv("./BLS_EP_files/PubMed_Timeline_Results_by_Year_NM.csv")
+dt <-
+  read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\aiep\\Annual_Production.csv")
+dt <-
+  read.csv("./BLS_EP_files/PubMed_Timeline_Results_by_Year_NM.csv")
+
 dt$Year <- factor(dt$Year)
-p <- ggplot(dt, aes(x = Year, y = Publications, group = group)) +
+ggplot(data = dt, mapping = aes(x = factor(Year), y = Articles, group = 1)) +
+  geom_line(colour = "#d5a478",linetype = 2, cex = 1.20) + 
+  geom_point(colour = "#d5a478") +
+  xlab("Year") +
+  ylab("Publications") + scale_y_continuous(expand = c(0,0),breaks = seq(0,50,5))  +
+  geom_bar(fill='steelblue',stat = "identity", width = 0.5, position = position_dodge(0.6)) +
+  theme_classic()
+
+
+p <- ggplot(dt, aes(x = Year, y = Articles, group = group)) +
   geom_line(aes(color = group)) +
   theme_classic() +
   ylab("Number of Publications Per Year") +
   geom_point(aes(color = group, shape = group)) +
-  scale_color_discrete(name = " ", breaks = c("Radiology", "NM"), labels = c("AI within Radiology", "AI within Nuclear Medicine")) +
-  scale_shape_discrete(name = " ", breaks = c("Radiology", "NM"), labels = c("AI within Radiology", "AI within Nuclear Medicine")) +
-  theme(legend.justification = c(0.05, 1), legend.position = c(0.05, 1))
+  scale_color_discrete(
+    name = " ",
+    breaks = c("Radiology", "NM"),
+    labels = c("AI within Radiology", "AI within Nuclear Medicine")
+  ) +
+  scale_shape_discrete(
+    name = " ",
+    breaks = c("Radiology", "NM"),
+    labels = c("AI within Radiology", "AI within Nuclear Medicine")
+  ) +
+  theme(
+    legend.justification = c(0.05, 1),
+    legend.position = c(0.05, 1)
+  )
 # theme(legend.title=element_blank())
 p
 p + ggimage::geom_image()
@@ -93,8 +137,12 @@ p + ggimage::geom_image()
 img <- "./BLS_EP_files/pet_clinical-100_2.jpg"
 ggbackground(p, img)
 ggbackground(p, img, alpha = 0.00009) # color="steelblue"
-ggbackground(p, img,
-  image_fun = function(x) image_negate(image_convolve(x, "DoG:0,10,10"))
+ggbackground(
+  p,
+  img,
+  image_fun = function(x) {
+    image_negate(image_convolve(x, "DoG:0,10,10"))
+  }
 )
 # Use custom color palettes
 p + scale_color_manual(values = c("#E69F00", "#56B4E9"))
@@ -112,6 +160,17 @@ ggplot(dt, aes(x = Year, y = Publications, group = group)) +
   theme_classic() +
   ylab("Number of Publications Per Year") +
   geom_point(aes(color = group, shape = group)) +
-  scale_color_discrete(name = " ", breaks = c("Radiology", "NM"), labels = c("AI within Radiology", "AI within Nuclear Medicine")) +
-  scale_shape_discrete(name = " ", breaks = c("Radiology", "NM"), labels = c("AI within Radiology", "AI within Nuclear Medicine")) +
-  theme(legend.justification = c(0.05, 1), legend.position = c(0.05, 1))
+  scale_color_discrete(
+    name = " ",
+    breaks = c("Radiology", "NM"),
+    labels = c("AI within Radiology", "AI within Nuclear Medicine")
+  ) +
+  scale_shape_discrete(
+    name = " ",
+    breaks = c("Radiology", "NM"),
+    labels = c("AI within Radiology", "AI within Nuclear Medicine")
+  ) +
+  theme(
+    legend.justification = c(0.05, 1),
+    legend.position = c(0.05, 1)
+  )
