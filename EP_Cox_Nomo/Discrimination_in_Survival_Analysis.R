@@ -31,7 +31,7 @@ S <- Surv(train$Follow_up_timemon, train$Rel._in_5yrs)
 
 # Kaplan-Meier plots
 par(mar = c(3, 3, 2, 2))
-layout(matrix(1:6, byrow = T, ncol = 2))
+layout(matrix(1:6, byrow = T, ncol = 3))
 train$Sex <- factor(train$Sex,
   levels = c(0, 1),
   labels = c("F", "M")
