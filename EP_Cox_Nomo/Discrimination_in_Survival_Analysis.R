@@ -6,8 +6,8 @@ library(survival)
 library(rms)
 getwd()
 # dt <- read.csv("./EP/EP_Cox_Nomo/TLE234-rad.csv")
-dt <- read.csv("/home/wane/Desktop/EP/Structured_Data/Task2/TLE234group.csv")
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv")
 train <- subset(dt, dt$Group == "Training")
 test <- subset(dt, dt$Group == "Test")
 table(dt$Rel._in_5yrs)
@@ -31,7 +31,7 @@ S <- Surv(train$Follow_up_timemon, train$Rel._in_5yrs)
 
 # Kaplan-Meier plots
 par(mar = c(3, 3, 2, 2))
-layout(matrix(1:4, byrow = T, ncol = 2))
+layout(matrix(1:6, byrow = T, ncol = 2))
 train$Sex <- factor(train$Sex,
   levels = c(0, 1),
   labels = c("F", "M")

@@ -522,7 +522,7 @@ logresult <- cutoff::logrank(
   data = train, # 数据集
   time = "Follow_up_timemon", # 生存时间
   y = "Rel._in_5yrs", # 生存状态
-  x = "Durmon", # 连续自变量
+  x = "novelscore", # 连续自变量
   cut.numb = 1, # 截断值选择1个分界点
   n.per = 0.10, # 分组后自变量组最少比例
   y.per = 0.10, # 分组后因变量组最少比例
@@ -539,17 +539,23 @@ res.cut <- surv_cutpoint(
   data = train, time = "Follow_up_timemon",
   event = "Rel._in_5yrs", variables = c("AI_radscore", "Lat_radscore", "Surgmon", "Onsetmon", "Durmon")
 )
+res.cut <- surv_cutpoint(
+  data = dt, time = "Follow_up_timemon",
+  event = "Rel._in_5yrs", variables = c("novelscore")
+)
 summary(res.cut) # 最佳截断值为0.339 +- 5.9
-plot(res.cut, "Durmon", palette = "npg")
+plot(res.cut, "novelscore", palette = "npg", cex.axis=1.2,cex.lab=1.0,cex.var = 1.5,
+     ylab='Clinic-PET scores')
 res.cat <- surv_categorize(res.cut)
-fit <- survfit(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ Onsetmon, data = res.cat)
+fit <- survfit(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ novelscore, data = res.cat)
 summary(fit)
-survdiff(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ Onsetmon, data = res.cat)
+survdiff(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ novelscore, data = res.cat)
 
 ggsurvplot(fit,
   data = res.cat,
   risk.table = TRUE, conf.int = TRUE,
   surv.median.line = "hv", # 同时显示垂直和水平参考线
+  legend.labs = c("Clinic-PET scores-low", "Clinic-PET scores-high"),
   pval = T, xlab = "Follow-up time(months)", ylab = "Free of Relapse(%)"
 )
 
@@ -559,7 +565,7 @@ ggsurvplot(fit,
   palette = c("#E7B800", "#2E9FDF"), braek.time.by = 12, ggtheme = theme_classic(), risk.table.y.text.col = T,
   risk.table.y.text = F, risk.table.height = 0.25,
   ncensor.plot = T, ncencer.plot.height = 0.25, # conf.int.style="step",
-  surv.median.line = "hv", legend.labs = c("Radscore-low", "Radscore-high")
+  surv.median.line = "hv", legend.labs = c("Clinic-PET scores-low", "Clinic-PET scores-high")
 )
 # 绘制累积风险曲线
 ggsurvplot(fit,
@@ -567,7 +573,7 @@ ggsurvplot(fit,
   fun = "cumhaz", # 绘制累积风险曲线
   conf.int = T, pval = T,
   palette = c("#E7B800", "#2E9FDF"),
-  legend.labs = c("Radscore-low", "Radscore-high"),
+  legend.labs = c("Clinic-PET scores-low", "Clinic-PET scores-high"),
   xlab = "Follow-up time(months)", ylab = "Cum Relapse(%)"
 )
 
@@ -1083,14 +1089,14 @@ library(riskRegression) # 可同时绘制ROC曲线和校正曲线
 str(train)
 train$Follow_up_timemon <- as.numeric(as.character(train$Follow_up_timemon))
 # 拟合cox回归
-f1 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ SGS + familial_epilepsy + Durmon + SE, data = train, y = TRUE, x = TRUE)
+f1 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ novelscore, data = dt, y = TRUE, x = TRUE)
 f2 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ radscore, data = train, y = TRUE, x = TRUE)
 f3 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = test, y = TRUE, x = TRUE)
 ### 例如评估两年的ROC及AUC值
-model <- riskRegression::Score(list("Clinic-PET" = f3), # "clinic" = f1, 
+model <- riskRegression::Score(list("Clinic-PET" = f1), # "clinic" = f1, 
   formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1,
-  data = test,
-  times = c(36), # 24, 36, 48 
+  data = dt,
+  times = c(48), # 24, 36, 48 
   plots = "roc",
   metrics = "auc"
 )
@@ -1226,7 +1232,7 @@ set.seed(123)
 cal1 <- rms::calibrate(full,
   cmethod = "KM",
   method = "boot",
-  u = 60, # u与time.inc一致
+  u = 12, # u与time.inc一致
   m = 57, # m约等于样本量的1/3
   B = 1000
 ) # bootstrap重复次数
@@ -1235,7 +1241,7 @@ plot(cal1,
   lty = 1, # 线段类型
   errbar.col = "blue",
   xlim = c(0, 1), ylim = c(0, 1),
-  xlab = "Nomogram-Predicted Probability of 60-month relapse",
+  xlab = "Nomogram-Predicted Probability of 12-month relapse",
   ylab = "Actual 12-month relapse(proportion)",
   col = "red",
   subtitles = F
@@ -1266,8 +1272,8 @@ plot(cal2,
 lines(cal2[, c("mean.predicted", "KM")], type = "b", lwd = 2, col = "red", pch = 16)
 abline(0, 1, lty = 3, lwd = 2, col = "black")
 
-full5 <- rms::cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon,
-  x = T, y = T, surv = T, data = test, time.inc = 60
+full5 <- rms::cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ novelscore,
+  x = T, y = T, surv = T, data = dt, time.inc = 60
 )
 cal3 <- rms::calibrate(full5,
   cmethod = "KM",
@@ -1281,8 +1287,8 @@ plot(cal3,
   lty = 1,
   errbar.col = "blue",
   xlim = c(0, 1), ylim = c(0, 1),
-  xlab = "Nomogram-Predicted Probability of 60-month relapse",
-  ylab = "Actual 60-month relapse(proportion)",
+  xlab = "Nomogram-Predicted Probability of 60-months relapse",
+  ylab = "Actual 60-months relapse(proportion)",
   col = "red",
   subtitles = F
 )
