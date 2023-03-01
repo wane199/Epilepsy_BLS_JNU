@@ -103,11 +103,12 @@ dt <-
 
 dt$Year <- factor(dt$Year)
 ggplot(data = dt, mapping = aes(x = factor(Year), y = Articles, group = 1)) +
-  geom_line(colour = "#d5a478",linetype = 2, cex = 1.20) + 
+  geom_line(colour = "#d5a478", linetype = 2, cex = 1.20) +
   geom_point(colour = "#d5a478") +
   xlab("Year") +
-  ylab("Publications") + scale_y_continuous(expand = c(0,0),breaks = seq(0,50,5))  +
-  geom_bar(fill='steelblue',stat = "identity", width = 0.5, position = position_dodge(0.6)) +
+  ylab("Publications") +
+  scale_y_continuous(expand = c(0, 0), breaks = seq(0, 50, 5)) +
+  geom_bar(fill = "steelblue", stat = "identity", width = 0.5, position = position_dodge(0.6)) +
   theme_classic()
 
 

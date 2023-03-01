@@ -20,8 +20,8 @@ library(survIDINRI)
 library(My.stepwise)
 
 # 读取数据集
-write.csv(dt,"C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
-dt <- read.csv("/home/wane/Desktop/EP/sci/cph/cph2/Test_MRIneg-78_CSB.csv")
+# write.csv(dt,"C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
 # dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv")
@@ -667,12 +667,15 @@ train %>%
 
 # 整体数据集的生存曲线
 # https://cloud.tencent.com/developer/article/1966729
-fit0 <- survfit(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1, data = train)
+dt <- dt[,6:24]
+fit0 <- survfit(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1, data = dt)
 ggsurvplot(fit0,
-  plaette = "#2E9FDF", data = train, risk.table = TRUE, surv.median.line = "hv",
-  pval = T, xlab = "Follow-up time(months)", ylab = "Free of Relapse(%)"
+  plaette = "cyan", data = dt, risk.table = TRUE, surv.median.line = "hv",
+  pval = T, xlab = "随访时间(月)", ylab = "无复发概率"
 )
-
+library(showtext)
+showtext_auto(enable = TRUE)
+font_add(family ="YaHei",regular ='msyh.ttc')
 # 绘制累积风险曲线
 ggsurvplot(fit0,
   plaette = "#2E9FDF", data = train, risk.table = TRUE,
