@@ -8,6 +8,8 @@ getwd()
 # dt <- read.csv("./EP/EP_Cox_Nomo/TLE234-rad.csv")
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group_factor.csv")
+
 train <- subset(dt, dt$Group == "Training")
 test <- subset(dt, dt$Group == "Test")
 table(dt$Rel._in_5yrs)

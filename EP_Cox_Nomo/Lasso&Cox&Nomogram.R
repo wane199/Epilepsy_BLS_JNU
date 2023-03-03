@@ -671,7 +671,7 @@ dt <- dt[,6:24]
 fit0 <- survfit(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1, data = dt)
 ggsurvplot(fit0,
   plaette = "cyan", data = dt, risk.table = TRUE, surv.median.line = "hv",
-  pval = T, xlab = "随访时间(月)", ylab = "无复发概率"
+  pval = T, xlab = "随访时间(月)", ylab = "无复发概率(%)"
 )
 library(showtext)
 showtext_auto(enable = TRUE)
