@@ -148,7 +148,7 @@ ggsave("./EP_Cox_Nomo/ggpathway/TCA_2.png", height = 4, width = 5, bg = "white")
 # 基因/通路上下游调控分析
 # R包安装
 library(devtools)
-# install_github("noriakis/CBNplot")
+install_github("noriakis/CBNplot")
 
 library(MicrobiomeProfiler)
 data(Rat_data)
