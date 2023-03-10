@@ -92,6 +92,7 @@ webshot(
 
 
 ################# Supports image files and graphic objects to be visualized
+rm(list = ls())
 require(magick)
 require(ggplot2)
 require(ggimage)
@@ -102,14 +103,22 @@ dt <-
   read.csv("./BLS_EP_files/PubMed_Timeline_Results_by_Year_NM.csv")
 
 dt$Year <- factor(dt$Year)
+summary(dt)
+windowsFonts(myFont = windowsFont("华文行楷"))
 ggplot(data = dt, mapping = aes(x = factor(Year), y = Articles, group = 1)) +
-  geom_line(colour = "#d5a478", linetype = 2, cex = 1.20) +
+  geom_line(colour = "#d5a478", linetype = 2, cex = 1.50) +
   geom_point(colour = "#d5a478") +
-  xlab("Year") +
-  ylab("Publications") +
-  scale_y_continuous(expand = c(0, 0), breaks = seq(0, 50, 5)) +
+  geom_text(aes(label = Articles),position=position_dodge(width = 0.9),size = 4.5,vjust = -0.35)+
+  xlab("发表年份") +
+  ylab("发文量") +
+  scale_y_continuous(expand = c(0, 0), breaks = seq(0, 50, 5), limits = c(0, 50)) +
   geom_bar(fill = "steelblue", stat = "identity", width = 0.5, position = position_dodge(0.6)) +
-  theme_classic()
+  theme_classic()+  theme(axis.text = element_text(size = 15,face = 'bold'))
+ggsave()
+
+library(showtext)
+showtext_auto(enable = TRUE)
+font_add(family ="YaHei",regular ='msyh.ttc')
 
 
 p <- ggplot(dt, aes(x = Year, y = Articles, group = group)) +
