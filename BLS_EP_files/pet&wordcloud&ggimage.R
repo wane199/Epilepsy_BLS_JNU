@@ -92,6 +92,7 @@ webshot(
 
 
 ################# Supports image files and graphic objects to be visualized
+rm(list = ls())
 require(magick)
 require(ggplot2)
 require(ggimage)
@@ -102,17 +103,24 @@ dt <-
   read.csv("./BLS_EP_files/PubMed_Timeline_Results_by_Year_NM.csv")
 
 dt$Year <- factor(dt$Year)
-ggplot(data = dt, mapping = aes(x = factor(Year), y = Articles, group = 1)) +
-  geom_line(colour = "#d5a478", linetype = 2, cex = 1.20) +
+summary(dt)
+windowsFonts(myFont = windowsFont("华文行楷"))
+ggplot(data = dt, mapping = aes(x = factor(Year), y = Publications, group = 1)) +
+  geom_line(colour = "#d5a478", linetype = 2, cex = 1.50) +
   geom_point(colour = "#d5a478") +
-  xlab("Year") +
-  ylab("Publications") +
-  scale_y_continuous(expand = c(0, 0), breaks = seq(0, 50, 5)) +
+  geom_text(aes(label = Publications),position=position_dodge(width = 0.9),size = 4.5,vjust = -0.35)+
+  xlab("发表年份") +
+  ylab("发文量") +
+  scale_y_continuous(expand = c(0, 0), breaks = seq(0, 50, 5), limits = c(0, 50)) +
   geom_bar(fill = "steelblue", stat = "identity", width = 0.5, position = position_dodge(0.6)) +
-  theme_classic()
+  theme_classic()+  theme(axis.text = element_text(size = 15,face = 'bold'))
+ggsave()
 
+library(showtext)
+showtext_auto(enable = TRUE)
+font_add(family ="YaHei",regular ='msyh.ttc')
 
-p <- ggplot(dt, aes(x = Year, y = Articles, group = group)) +
+p <- ggplot(dt, aes(x = Year, y = Publications, group = group)) +
   geom_line(aes(color = group)) +
   theme_classic() +
   ylab("Number of Publications Per Year") +
@@ -175,3 +183,20 @@ ggplot(dt, aes(x = Year, y = Publications, group = group)) +
     legend.justification = c(0.05, 1),
     legend.position = c(0.05, 1)
   )
+
+
+# [R优雅的给图表添加背景图](https://mp.weixin.qq.com/s?__biz=Mzg3MzQzNTYzMw==&mid=2247502179&idx=1&sn=c1e2f83f814391ae04669414497c8204&chksm=cee291fdf99518eb48deb5e8fc2fb30a9fe9b9220b152710d2b787f728a56b533c783f0e43bd&mpshare=1&scene=1&srcid=0325ByxvWzSKpoNBPH7Q0uTg&sharer_sharetime=1679750442995&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
+library(tidyverse)
+library(ggforce)
+library(cowplot)
+library(magick)
+library(ggbeeswarm)
+library(ggtext)
+library(ggh4x)
+
+img <- 
+  image_read("./BLS_EP_files/SIGNA-PET-MR.jpg") %>% 
+  image_resize("200x220") %>%
+  image_colorize(4,"white")
+ggdraw() + draw_image(img) + draw_plot(p) 
+
