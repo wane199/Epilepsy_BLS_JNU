@@ -1,2 +1,57 @@
 # (TwoSample MR Practical)[https://zhuanlan.zhihu.com/p/605966100]
+install.packages(c("devtools", "knitr", "rmarkdown"))
+library(devtools)
+install_github(c("MRCIEU/TwoSampleMR", "MRCIEU/MRInstruments"))
+install_github("WSpiller/MRPracticals", build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
+install_github("WSpiller/MRPracticals", build_opts = c("--no-resave-data", "--no-manual"))
+
+## Step 1: 获取暴露摘要估计
+### GWAS 目录
+data(gwas_catalog)
+exposure_gwas <- subset(gwas_catalog, grepl("Blood", Phenotype_simple))
+exposure_gwas <- subset(gwas_catalog, grepl("Neale", Author))
+
+exposure_gwas <- subset(gwas_catalog, grepl("Locke", Author) &
+  Phenotype_simple == "Body mass index")
+
+head(exposure_gwas[, c(7:12, 18:21)])
+
+exposure_gwas <- subset(exposure_gwas, grepl("EA", Phenotype_info))
+exposure_gwas <- exposure_gwas[!grepl("women", exposure_gwas$Phenotype_info), ]
+exposure_gwas <- exposure_gwas[!grepl("men", exposure_gwas$Phenotype_info), ]
+head(exposure_gwas[, c(7:12, 18:21)])
+
+exposure_gwas <- exposure_gwas[exposure_gwas$pval < 5 * 10^-8, ]
+
+exposure_data <- format_data(exposure_gwas)
+
+exposure_data <- clump_data(exposure_data, clump_r2 = 0.001)
+
+exposure_data <- clump_data(exposure_data, clump_r2 = 0.001)
+
+quick_extract <- extract_instruments(2)
+
+## Step 2 获取结局摘要估计
+ao <- available_outcomes()
+head(ao)[, c(3, 4, 6, 8, 9, 20)]
+
+outcome_gwas <- subset(ao, grepl("Systolic", trait))
+head(outcome_gwas)[, c(3, 4, 6, 8, 9, 11, 16, 20)]
+
+outcome_data <- extract_outcome_data(
+  snps = exposure_data$SNP, outcomes = "UKB-a:360"
+)
+
+H_data <- harmonise_data(
+  exposure_dat = exposure_data,
+  outcome_dat = outcome_data
+)
+
+H_data <- power_prune(H_data)
+
+## Step 3 进行MR分析
+### 获取效应估计值
+
+
+
 
