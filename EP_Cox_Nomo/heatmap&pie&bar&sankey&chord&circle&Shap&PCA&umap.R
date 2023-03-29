@@ -293,9 +293,9 @@ ggplot(x.melt, aes(x = sub, y = variable)) +
 library(tidyverse)
 library(funkyheatmap)
 library(kableExtra)
-df <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\aiep\\Kfold-CV.csv",sep = ";") # , row = 5
-df <- df[-c(1),]
-funky_heatmap(df)
+df <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\aiep\\BLS.csv",sep = ";") # , row = 5
+# df <- df[-c(1),]
+funky_heatmap(df[1:8])
 
 ####################################
 # pie charts
