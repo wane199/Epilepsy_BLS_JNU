@@ -4,7 +4,7 @@ rm(list = ls())
 library(runway)
 library(multiROC)
 
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\bls\\mripredictions\\outputsave\\test-cal-f3_f4.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\bls\\mripredictions\\outputsave\\test-cal-f3_f4.csv",sep = ";")
 head(dt)
 
 #### 三分类哑变量处理
@@ -65,5 +65,20 @@ threshperf_plot_multi(aql, outcome = 'outcomes', prediction = 'predictions', mod
 
 library(riskRegression)
 
+
+data(single_model_dataset)
+head(single_model_dataset)
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\bls\\petpredictions\\outputsave\\f0 - 副本.csv",sep = ";")
+head(dt)
+cal_plot(dt, outcome = 'Label', prediction = 'Prob2', n_bins = 100)
+
+library(reshape2) #  首先加载一下reshape2包
+aql <- melt(dt,  id.vars = c("Label"), variable.name = "classes", value.name = "predictions") 
+
+
+data(multi_model_dataset)
+head(multi_model_dataset)
+cal_plot_multi(multi_model_dataset, outcome = 'outcomes',model = 'model_name', prediction = 'predictions', n_bins = 5)
+cal_plot_multi(aql, outcome = 'Label',model = 'classes', prediction = 'predictions', n_bins = 500)
 
 
