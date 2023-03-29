@@ -2,7 +2,7 @@
 rm(list = ls())
 # 读入数据
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor0.csv") # , row = 5
-dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group_factor.csv", row = 5)
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\aiep\\TLE220group_zh.csv",sep = ";") # , row = 5
 # dt <- read.csv("/media/wane/UNTITLED/BLS-ep-pre/EP/Structured_Data/Task2/COX12mon/TLE234group.csv")
 # dt <- dt[-1]
 dt <- dt[, 5:23]
@@ -139,17 +139,20 @@ grid.arrange(arrangeGrob(grobs = plot_list, ncol = 2))
 
 # [R学习|临床相关性热图展示病例临床特征与结局事件之间的相关性](https://mp.weixin.qq.com/s?__biz=MzkzNzMxNjgxMA==&mid=2247487685&idx=1&sn=fe03a6a68d36ebc995449149bab0dd19&chksm=c2900860f5e78176a1531f28f40603eeec0d7aae690b6436f6803297ad23de8fb887be306a3b&mpshare=1&scene=1&srcid=0219CB8H6EBcm5EmcmX8NWXc&sharer_sharetime=1676769225579&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
 dt <- dt %>%
-  arrange(Rel._in_5yrs)
+  arrange(复发状态) # Rel._in_5yrs
 dt %>% glimpse()
+dt <- dt[, 2:18]
 survdata <- data.frame(row.names = rownames(dt), OS = dt[, 1]) # 产生点注释生存数据
 dt <- dt[, -1] # 其余注释数据
 # 用for循环语句将数值型变量转为因子变量
-for (i in names(dt)[c(1:18)]) {
+for (i in names(dt)[c(1:3,7:16)]) {
   dt[, i] <- as.factor(dt[, i])
 }
 str(dt)
+library(showtext)
+showtext_auto()
 ha <- HeatmapAnnotation(
-  survival_time = anno_points(survdata,
+  "随访时间(月)" = anno_points(survdata,
     size = unit(0.1, "cm"), # 点注释
     gp = gpar(col = "grey")
   ), df = dt, # 点注释属性及其他临床特征注释
@@ -158,7 +161,6 @@ ha <- HeatmapAnnotation(
     side = c("Left" = "#A6D854", "Right" = "#E78AC3")
   )
 )
-
 heat <- Heatmap(matrix(nrow = 0, ncol = nrow(dt)), top_annotation = ha)
 heat
 draw(heat, annotation_legend_side = "bottom")
@@ -287,19 +289,26 @@ ggplot(x.melt, aes(x = sub, y = variable)) +
 # library(maftools)
 # plotVaf(maf = maf)
 
+#### funkyheatmap优雅的可视化数据框热图
+library(tidyverse)
+library(funkyheatmap)
+library(kableExtra)
+df <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\aiep\\Kfold-CV.csv",sep = ";") # , row = 5
+df <- df[-c(1),]
+funky_heatmap(df)
 
 ####################################
 # pie charts
-plot(dt[6:24]) # library
+plot(dt[6:18]) # library
 library(ggplot2)
 library(dplyr)
 library(ggsci)
 library(patchwork)
 theme_set(theme_classic())
 
-group_by(train, oneyr) %>%
-  summarise(percent = n() / nrow(train)) %>%
-  ggplot(aes(x = "", y = percent, fill = factor(oneyr))) +
+group_by(dt, 复发状态) %>%
+  summarise(percent = n() / nrow(dt)) %>%
+  ggplot(aes(x = "", y = percent, fill = factor(复发状态))) +
   geom_bar(width = 1, stat = "identity") +
   coord_polar(theta = "y", start = -0.5)
 
@@ -337,10 +346,22 @@ p2 <- group_by(test, oneyr) %>%
 
 p1 + p2 + plot_layout(guides = "collect") + plot_annotation(tag_levels = "A")
 
-df <- group_by(train, oneyr) %>%
-  summarise(percent = n() / nrow(train)) %>%
+group_by(dt, 复发状态) %>%
+  summarise(percent = n() / nrow(dt)) %>%
+  ggplot(aes(x = factor(1), y = percent, fill = factor(复发状态))) +
+  coord_polar(theta = "y", start = -0.05) +
+  scale_fill_brewer("Blues") +
+  blank_theme +
+  theme(axis.text.x = element_blank()) +
+  geom_col(colour = "white") +
+  geom_text(aes(label = paste0(round(percent * 100, 2), "%")),
+    position = position_fill(vjust = 0.5)
+  )
+
+df <- group_by(dt, 复发状态) %>%
+  summarise(percent = n() / nrow(dt)) %>%
   arrange(desc(percent))
-pie(df$percent, labels = df$oneyr)
+pie(df$percent, labels = df$复发状态)
 
 # You can also call the palette using a name.
 ggplot(train, aes(y = oneyr, x = radscore)) +
@@ -348,7 +369,7 @@ ggplot(train, aes(y = oneyr, x = radscore)) +
   scale_fill_continuous(type = "viridis") +
   theme_bw()
 
-ggplot(data = train, mapping = aes(x = factor(oneyr), fill = factor(oneyr))) +
+ggplot(data = dt, mapping = aes(x = factor(复发状态), fill = factor(复发状态))) +
   geom_bar(stat = "count", fill = "steelblue", colour = "darkred")
 # + geom_text(mapping = aes(label = 'count'))
 
@@ -545,10 +566,11 @@ train$DurMonth <- cut(train$Durmon, breaks = c(-Inf, 108.00, Inf), labels = c("0
 test$Rad <- cut(test$radscore, breaks = c(-Inf, 0.1834, Inf), labels = c("0", "1"), right = TRUE, include.lowest = TRUE)
 test$DurMonth <- cut(test$Durmon, breaks = c(-Inf, 108.00, Inf), labels = c("0", "1"), right = TRUE, include.lowest = TRUE)
 
-dt_re1 <- melt(dt[c(5,7:16,24)], id = c("ID"))
+dt_re1 <- melt(dt[c(5, 7:16, 24)], id = c("ID"))
 dt_re1$value <- as.factor(dt_re1$value)
 dt_re1 <- transform(dt_re1,
-                    value = factor(value, rev(levels(value))))# 响应变量因子化，反转层级
+  value = factor(value, rev(levels(value)))
+) # 响应变量因子化，反转层级
 library(RColorBrewer)
 # Define the number of colors you want
 nb.cols <- 18
@@ -560,14 +582,14 @@ ggplot(
     fill = value, label = value
   )
 ) +
-  # scale_fill_brewer(type = "qual", palette = "Set3") +  
+  # scale_fill_brewer(type = "qual", palette = "Set3") +
   scale_fill_manual(values = mycolors) +
-  scale_x_discrete(expand = c(.1, .1)) + 
+  scale_x_discrete(expand = c(.1, .1)) +
   geom_flow(
     stat = "alluvium", lode.guidance = "frontback",
     color = "darkgray"
   ) +
-  # geom_alluvium(aes(fill=Rel.in_5yrs)) + 
+  # geom_alluvium(aes(fill=Rel.in_5yrs)) +
   geom_stratum(alpha = .25, reverse = FALSE) +
   geom_text(stat = "stratum", size = 2, aes(label = after_stat(stratum)), reverse = FALSE) + # 显示分类标签
   theme_classic() +
@@ -624,7 +646,7 @@ rownames(test) <- test[, 4]
 rt <- as.matrix(test[c(6:8, 13, 16)])
 
 # 计算指标间相关性
-cor1 <- cor(rt,method = c("pearson"))
+cor1 <- cor(rt, method = c("pearson"))
 # 显示P值
 rt <- as.matrix(rt)
 p <- rcorr(rt)
@@ -640,10 +662,10 @@ circos.clear()
 circos.par(start.degree = 90, gap.degree = 4, track.margin = c(-0.1, 0.1), points.overflow.warning = FALSE)
 par(mar = rep(0, 4))
 # par(mar = c(2, 2, 2, 4))
-circos.par(gap.degree=c(3,rep(2, nrow(cor1)-1)), start.degree = 180)
-chordDiagram(cor1, grid.col=rainbow(ncol(rt)), col=col1, transparency = 0.5, symmetric = T)
-par(xpd=T)
-colorlegend(col, vertical = T,labels=c(1,0,-1),xlim=c(1.1,1.3),ylim=c(-0.4,0.4))  
+circos.par(gap.degree = c(3, rep(2, nrow(cor1) - 1)), start.degree = 180)
+chordDiagram(cor1, grid.col = rainbow(ncol(rt)), col = col1, transparency = 0.5, symmetric = T)
+par(xpd = T)
+colorlegend(col, vertical = T, labels = c(1, 0, -1), xlim = c(1.1, 1.3), ylim = c(-0.4, 0.4))
 
 # https://www.jianshu.com/p/9477a3405545
 chordDiagram(
@@ -658,7 +680,7 @@ library(viridis)
 library(reshape2)
 
 df <- read.csv("示例数据1.csv", header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
-df <- dt[,5:24]
+df <- dt[, 5:24]
 df_melt <- melt(dt[c(6:8, 13, 16, 24)], id.vars = c("ID"))
 colnames(df_melt) <- c("from", "to", "value")
 df_melt$to <- as.character(df_melt$to)
@@ -722,7 +744,7 @@ library(eoffice)
 topptx(filename = "和弦图.pptx")
 setEPS()
 postscript("whatever.eps")
-plot(rnorm(100), main="Hey Some Data") # 自己的绘图函数
+plot(rnorm(100), main = "Hey Some Data") # 自己的绘图函数
 dev.off()
 
 

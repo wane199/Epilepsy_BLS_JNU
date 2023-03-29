@@ -99,7 +99,7 @@ chest_forest(results)
 # Heat map & Radiomics 
 rm(list = ls())
 library(data.table)
-mydata <- read.csv("./TBS/app/data/heat.csv", row.names=1)
+mydata <- read.csv("../TBS_monkey/TBS/app/data/heat.csv", row.names=1)
 dt <- t(mydata)
 # dt <- transpose(mydata)
 colnames(dt) <- c("RF","ETC","GBC","EGB","KNN","DTC")
