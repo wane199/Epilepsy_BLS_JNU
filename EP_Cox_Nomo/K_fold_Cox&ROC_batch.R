@@ -9,7 +9,7 @@ library(pec) # cox回归时间c指数用
 
 # 读入数据
 dt0 <- read.csv("/Users/mac/Desktop/BLS-ep-pre/EP/Structured_Data/Task2/TLE234group.csv")
-dt <- read.csv("C:\\Users\\wane199\\Desktop\\EP\\Structured_Data\\PET-TLE234-radscore-RCS2.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\aiep\\TLE220group.csv",sep = ";")
 
 table(dt$Freq)
 train <- subset(dt, dt$Group == "Training")
@@ -18,7 +18,7 @@ test <- subset(dt, dt$Group == "Test")
 # 查看变量性质
 str(dt)
 # 批量数值转因子
-for (i in names(dt)[c(4:7)]) {
+for (i in names(dt)[c(10,11,15:24)]) {
   dt[, i] <- as.factor(dt[, i])
 }
 # 再次查看变量性质
