@@ -127,10 +127,6 @@ library(showtext)
 showtext_auto(enable = TRUE)
 font_add(family ="YaHei",regular ='msyh.ttc')
 
-library(showtext)
-showtext_auto(enable = TRUE)
-font_add(family ="YaHei",regular ='msyh.ttc')
-
 p <- ggplot(dt, aes(x = Year, y = Publications, group = group)) +
   geom_line(aes(color = group)) +
   theme_classic() +
