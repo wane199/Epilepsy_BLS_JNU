@@ -69,6 +69,8 @@ p3 <- ggviolin(dt, x = "Model", y = "AUC_36",
 # p1 | p2 | p3
 
 library(reshape2) # 转换长矩阵需要这个包
+dt <- dplyr::filter(dt, grepl('T1_临床特征', Dataset)) # 使用dplyr包的filter函数筛选dataframe数据中不包含特定字符串的数据行（not contains）
+dt <- subset(dt, dt$Dataset == "T1_临床特征")
 dt <- dt[-1]
 data1 <- melt(dt, id.vars = "Model") #以surstat为参照列转换成长矩阵
 p2 <- ggviolin(data1, x = "Model", # x轴还是surstat状态
@@ -76,7 +78,7 @@ p2 <- ggviolin(data1, x = "Model", # x轴还是surstat状态
               fill = "Model", #按surstat状体填充颜色
               facet.by = "variable",# 按照variable列分屏画图
               alpha = 1,width = 0.5,legend = "right",legend.title = "模型",
-              ylab="参数值",  xlab=FALSE, title = "T1WI+临床",
+              ylab="参数值",  xlab=FALSE, title = "T1_临床特征",
               font.y = 15,x.text.angle = 45, y.text.angle = 90,
               font.tickslab = c(15,"plain","black"),
               add = "boxplot", 
@@ -86,18 +88,18 @@ p2 <- p2 + stat_compare_means(method = "t.test", label = "p.format",
 p2
 ##############
 # 绘制多分组图
-dt <- dplyr::filter(dt, grepl('ResNet', Model)) # 使用dplyr包的filter函数筛选dataframe数据中不包含特定字符串的数据行（not contains）
+dt <- dplyr::filter(dt, !grepl('ResNet模型', Model)) # 使用dplyr包的filter函数筛选dataframe数据中不包含特定字符串的数据行（not contains）
 head(dt)
 dt <- dt[,-2]
 data1 <- melt(dt, id.vars = "Dataset") #以surstat为参照列转换成长矩阵
 # 设置两两比较分组
-my_comparisons <- list(c("PTT1CLI", "PTCLI"), c("PTT1CLI", "T1CLI"), c("PTCLI", "T1CLI"))##多分组设定比较
+my_comparisons <- list(c("PET_T1_临床特征", "PET_临床特征"), c("PET_T1_临床特征", "T1_临床特征"), c("PET_临床特征", "T1_临床特征"))##多分组设定比较
 p4 <- ggviolin(data1, x = "Dataset", # x轴还是surstat状态
          y = "value", # y轴是基因表达值
          fill = "Dataset", #按surstat状体填充颜色
          facet.by = "variable",# 按照variable列分屏画图
          alpha = 1,width = 0.5,legend = "right",legend.title = "数据集",
-         ylab="参数值",  xlab=FALSE, title = "ResNet模型",ylim = c(0,1.3),
+         ylab="参数值",  xlab=FALSE, title = "Cox模型",ylim = c(0,1.3),
          font.y = 15,x.text.angle = 45, y.text.angle = 90,
          font.tickslab = c(15,"plain","black"),
          add = "boxplot", 
