@@ -124,10 +124,12 @@ print(tab2, quote = T)
 #############################################
 ## 分组柱状图展示多个模型三分类AUROC及AUPRC
 # 多模型效能比较，除了ROC还有别的选择吗？
+rm(list = ls())
 library(ggplot2) 
 library(dplyr)
 getwd()
-auc <- read.csv("./EP/BLS_EP_files/ACC_multi.csv")
+auc <- read.csv("./BLS_EP_files/ACC_multi.csv",sep = ";")
+options(digits = 3)
 str(auc)
 summary(auc)
 auc$ACC <- as.numeric(auc$ACC)
@@ -135,74 +137,80 @@ auc$ACC <- round(auc$ACC,3)
 # fix(auc)
 # Grouped
 auc %>%
-  mutate(Methods = factor(Model, levels = c("BLS-Sia net", "Sia net", "RF", "KNN", "LR", "Senior level", "Junior level"))) %>%
+  mutate(Methods = factor(Model, levels = c("多模态Siamese Net", "Siamese Net", "随机森林", "K-最近邻", "逻辑回归", "高年资医生", "低年资医生"))) %>%
   ggplot(mapping = aes(x = reorder(Image, Methods), y = ACC, fill = Methods)) +
   geom_bar(stat = "identity", position = position_dodge(0.75), width = 0.6) +
-  coord_cartesian(ylim = c(0.5, 1.0)) +
+  coord_cartesian(ylim = c(0.50, 1.00)) +
   scale_y_continuous(expand = c(0, 0)) + # 消除x轴与绘图区的间隙
   # scale_fill_grey(start = 0.2, end = 1.0) +
   scale_fill_brewer(palette = "Set2") +
-  labs(x = "", y = "Accuracy") +
+  labs(x = "", y = "准确率") + # Accuracy
   theme_classic() +  theme(legend.position = c(0.98, 0.80),
     legend.justification = c(0.98, 0.80)) + 
-  geom_text(aes(label = auc$ACC),
-            size = 2.0,
+  guides(fill=guide_legend(title='模型')) +
+  geom_text(aes(label = round(auc$ACC,3)),
+            size = 1.5,
             position = position_dodge2(width = 0.75, preserve = "single"),
             vjust = -0.5, hjust = 0.5
   ) -> p1
 p1
 auc %>%
-  mutate(Methods = factor(Model, levels = c("BLS-Sia net", "Sia net", "RF", "KNN", "LR", "Senior level", "Junior level"))) %>%
+  mutate(Methods = factor(Model, levels = c("多模态Siamese Net", "Siamese Net", "随机森林", "K-最近邻", "逻辑回归", "高年资医生", "低年资医生"))) %>%
   ggplot(mapping = aes(x = reorder(Image, Methods), y = F1_score, fill = Methods)) +
   geom_bar(stat = "identity", position = position_dodge(0.75), width = 0.6) +
   coord_cartesian(ylim = c(0.1, 1.0)) +
   scale_y_continuous(expand = c(0, 0)) + # 消除x轴与绘图区的间隙
   # scale_fill_grey(start = 0.2, end = 1.0) +
   scale_fill_brewer(palette = "Set2") +
-  labs(x = "", y = "F1 score") +
+  labs(x = "", y = "F1分数") +
   theme_classic() + theme(legend.position = c(0.98, 0.80),
                           legend.justification = c(0.98, 0.80)) + 
+  guides(fill=guide_legend(title='模型')) +
   geom_text(aes(label = auc$F1_score),
-            size = 2.0,
+            size = 1.5,
             position = position_dodge2(width = 0.75, preserve = "single"),
             vjust = -0.5, hjust = 0.5
   ) -> p2
 
 auc %>%
-  mutate(Methods = factor(Model, levels = c("BLS-Sia net", "Sia net", "RF", "KNN", "LR", "Senior level", "Junior level"))) %>%
+  mutate(Methods = factor(Model, levels = c("多模态Siamese Net", "Siamese Net", "随机森林", "K-最近邻", "逻辑回归", "高年资医生", "低年资医生"))) %>%
   ggplot(mapping = aes(x = reorder(Image, Methods), y = SEN, fill = Methods)) +
   geom_bar(stat = "identity", position = position_dodge(0.75), width = 0.6) +
   coord_cartesian(ylim = c(0.1, 1.0)) +
   scale_y_continuous(expand = c(0, 0)) + # 消除x轴与绘图区的间隙
   # scale_fill_grey(start = 0.2, end = 1.0) +
   scale_fill_brewer(palette = "Set2") +
-  labs(x = "", y = "Sensitivity") +
+  labs(x = "", y = "灵敏度") +
   theme_classic() + theme(legend.position = c(0.98, 0.80),
     legend.justification = c(0.98, 0.80)) + 
+  guides(fill=guide_legend(title='模型')) +
   geom_text(aes(label = auc$SEN),
-    size = 2.0,
+    size = 1.5,
     position = position_dodge2(width = 0.75, preserve = "single"),
     vjust = -0.5, hjust = 0.5
   ) -> p3
 
 auc %>%
-  mutate(Methods = factor(Model, levels = c("BLS-Sia net", "Sia net", "RF", "KNN", "LR", "Senior level", "Junior level"))) %>%
+  mutate(Methods = factor(Model, levels = c("多模态Siamese Net", "Siamese Net", "随机森林", "K-最近邻", "逻辑回归", "高年资医生", "低年资医生"))) %>%
   ggplot(mapping = aes(x = reorder(Image, Methods), y = SPE, fill = Methods)) +
   geom_bar(stat = "identity", position = position_dodge(0.75), width = 0.6) +
   coord_cartesian(ylim = c(0.3, 1.0)) +
   scale_y_continuous(expand = c(0, 0)) + # 消除x轴与绘图区的间隙
   # scale_fill_grey(start = 0.2, end = 1.0) +
   scale_fill_brewer(palette = "Set2") +
-  labs(x = "", y = "Specificity") +
+  labs(x = "", y = "特异度") +
   theme_classic() + theme(legend.position = c(0.98, 0.80),
                           legend.justification = c(0.98, 0.80)) + 
+  guides(fill=guide_legend(title='模型')) +
   geom_text(aes(label = auc$SPE),
-            size = 2.0,
+            size = 1.5,
             position = position_dodge2(width = 0.75, preserve = "single"),
             vjust = -0.5, hjust = 0.5
   ) -> p4
 
 # 拼图合并相同图例
+library(showtext)
+showtext_auto()
 library(patchwork)
 p1 + p2 + p3 + p4 + plot_layout(guides='collect') + plot_annotation(tag_levels = 'A') + theme(legend.position = c(0.98, 0.80),legend.justification = c(0.98, 0.80))
 
