@@ -9,6 +9,7 @@ enableWGCNAThreads() # 查看WGCNA可以调用多少线程工作
 options(stringsAsFactors = FALSE)
 # Read in the female liver data set
 femData <- read.csv("C:\\Users\\wane1\\Downloads\\testdata\\LiverFemale3600.csv", sep = ";")
+femData <- read.csv("C:\\Users\\wane199\\Downloads\\testdata\\LiverFemale3600.csv", sep = ";")
 # Take a quick look at what is in the data set:
 dim(femData)
 names(femData)[1:10]
@@ -63,6 +64,7 @@ datExpr[1:5,1:5]
 
 # 1.5 加载注释信息
 traitData = read.csv("C:\\Users\\wane1\\Downloads\\testdata\\ClinicalTraits.csv", sep = ";")
+traitData = read.csv("C:\\Users\\wane199\\Downloads\\testdata\\ClinicalTraits.csv", sep = ";")
 dim(traitData)#有三十多列注释
 traitData[1:5,1:5]
 names(traitData)
@@ -87,3 +89,4 @@ traitColors = numbers2colors(datTraits, signed = FALSE);
 plotDendroAndColors(sampleTree2, traitColors,
                     groupLabels = names(datTraits),
                     main = "Sample dendrogram and trait heatmap")
+
