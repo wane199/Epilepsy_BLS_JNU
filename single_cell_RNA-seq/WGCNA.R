@@ -71,9 +71,6 @@ traitData <- read.csv("C:\\Users\\wane1\\Downloads\\testdata\\ClinicalTraits.csv
 traitData <- read.csv("C:\\Users\\wane199\\Downloads\\testdata\\ClinicalTraits.csv", sep = ";")
 dim(traitData) # 有三十多列注释
 traitData[1:5, 1:5]
-traitData <- read.csv("C:\\Users\\wane1\\Downloads\\testdata\\ClinicalTraits.csv", sep = ";")
-dim(traitData) # 有三十多列注释
-traitData[1:5, 1:5]
 names(traitData)
 # remove columns that hold information we do not need.
 allTraits <- traitData[, -c(31, 16)]
