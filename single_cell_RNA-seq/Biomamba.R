@@ -147,3 +147,18 @@ saveRDS(pbmc,'pbmc.rds')
 pbmc<- readRDS('pbmc.rds')
 DimPlot(pbmc, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
 
+###########单纯的merge#################
+library(Seurat)
+library(multtest)
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+##########准备用于拆分的数据集#########并
+#pbmc <subset(pbmc,downsample 50)
+ifnb <readRDS('pbmcrenamed.rds')
+ifnb.list <Splitobject(ifnb,split.by "group")
+C57 <ifnb.list$c57
+AS1 <ifnb.list$AS1
+######简单merge########
+#不具有去批次效应功能
+pbmc <-merge(C57,y c(AS1),add.cell.ids c("C57","AS1"),
