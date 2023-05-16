@@ -9,8 +9,19 @@ set.seed(123)
 dt0 <- read.csv("C:/Users/wane199/Desktop/EP/Structured_Data/PET-TLE234-radscore-RCS2.csv")
 # dt1 <- read_excel("/home/wane/Desktop/EP/Structured_Data/Task2/TLE234group.xlsx")
 dt0 <- dt0[c(-1, -2)]
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\XML\\TLE234group_2019.csv")
+dt <- na.omit(dt)
+dt <- dt[c(7:24)]
+vfactor <- c("oneyr", "side", "Sex")
+dt[vfactor] <- lapply(dt[vfactor], factor)
+# 批量数值转因子
+for (i in names(dt)[c(-2, -3, -6:-8)]) {
+  dt[, i] <- as.factor(dt[, i])
+}
+str(dt)
 dt <- dt0[c(-1, -3)] # 获取数据
 dt$oneyr # 查看阳性结局
+
 # 2.2 Clean data To get a first impression of the data we take a look at the top 4 rows:
 library(gt)
 dt %>% 
@@ -118,8 +129,27 @@ collect_predictions(four_fits)
 # 直接可视化4个模型的结果，感觉比ROC曲线更好看，还给出了可信区间。这个图可以自己用ggplot2语法修改。
 four_fits %>% autoplot(metric = "roc_auc") + theme_bw()
 
+# 选择表现最好的应用于测试集：
+rand_res <- last_fit(rf_mod,pbp_rec,split_pbp)
+# 查看在测试集的模型表现：
+collect_metrics(rand_res) # test 中的模型表现
 
+# 使用其他指标查看模型表现：
+metricsets <- metric_set(accuracy, mcc, f_meas, j_index)
+collect_predictions(rand_res) %>% 
+  metricsets(truth = play_type, estimate = .pred_class)
 
+# 可视化结果，喜闻乐见的混淆矩阵：
+collect_predictions(rand_res) %>% 
+  conf_mat(play_type,.pred_class) %>% 
+  autoplot()
+
+# 喜闻乐见的ROC曲线：
+collect_predictions(rand_res) %>% 
+  roc_curve(play_type,.pred_pass) %>% 
+  autoplot()
+
+############
 # 选择随机森林，建立workflow：
 rf_spec <- rand_forest(mode = "classification") %>% 
   set_engine("ranger",importance = "permutation")
