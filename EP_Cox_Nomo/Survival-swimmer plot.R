@@ -1,5 +1,6 @@
 # Creating a survival-swimmer plot in R(http://rstudio-pubs-static.s3.amazonaws.com/389060_a0ea812d8f8d490393bd1c65a6dcddef.html)
 # Importing the required libraries
+rm(list = ls())
 library(magrittr)
 library(stringi)
 library(readr)   # Reading in the dataset

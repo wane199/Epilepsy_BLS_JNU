@@ -4,14 +4,16 @@ suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(tidymodels))
 library(kknn)
 tidymodels_prefer()
+show_model_info("rand_forest")
+show_model_info("boost_tree")
 
 set.seed(123)
-dt0 <- read.csv("C:/Users/wane199/Desktop/EP/Structured_Data/PET-TLE234-radscore-RCS2.csv")
+# dt0 <- read.csv("C:/Users/wane199/Desktop/EP/Structured_Data/PET-TLE234-radscore-RCS2.csv")
 # dt1 <- read_excel("/home/wane/Desktop/EP/Structured_Data/Task2/TLE234group.xlsx")
-dt0 <- dt0[c(-1, -2)]
+# dt0 <- dt0[c(-1, -2)]
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\XML\\TLE234group_2019.csv")
 dt <- na.omit(dt)
-dt <- dt[c(7:24)]
+dt <- dt[c(7:24)] # 获取数据
 vfactor <- c("oneyr", "side", "Sex")
 dt[vfactor] <- lapply(dt[vfactor], factor)
 # 批量数值转因子
@@ -19,34 +21,34 @@ for (i in names(dt)[c(-2, -3, -6:-8)]) {
   dt[, i] <- as.factor(dt[, i])
 }
 str(dt)
-dt <- dt0[c(-1, -3)] # 获取数据
-dt$oneyr # 查看阳性结局
+table(dt$oneyr) # 查看阳性结局
 
 # 2.2 Clean data To get a first impression of the data we take a look at the top 4 rows:
 library(gt)
-dt %>% 
-  slice_head(n = 4) %>% 
+dt %>%
+  slice_head(n = 4) %>%
   gt() # print output using gt
 glimpse(dt)
 library(visdat)
 vis_dat(dt)
 
-dt %>% 
+dt %>%
   count(oneyr,
-        sort = TRUE)
-
-# convert to numeric
-dt <- 
-  dt %>% 
-  mutate(
-    housing_median_age = as.numeric(housing_median_age),
-    median_house_value = as.numeric(median_house_value)
+    sort = TRUE
   )
 
-# convert all remaining character variables to factors 
-dt <- 
-  dt %>% 
-  mutate(across(where(is.character), as.factor))
+# # convert to numeric
+# dt <-
+#   dt %>%
+#   mutate(
+#     housing_median_age = as.numeric(housing_median_age),
+#     median_house_value = as.numeric(median_house_value)
+#   )
+#
+# # convert all remaining character variables to factors
+# dt <-
+#   dt %>%
+#   mutate(across(where(is.character), as.factor))
 
 set.seed(123)
 # 数据划分，根据oneyr分层
@@ -54,29 +56,29 @@ split_ep <- initial_split(dt, 0.70, strata = oneyr)
 train <- training(split_ep)
 test <- testing(split_ep)
 
-train <- subset(dt0, dt0$Group == "Training")
-test <- subset(dt0, dt0$Group == "Test")
-normal_para <- preProcess(x = train[, 3:16], method = c("center", "scale")) # 提取训练集的标准化参数
-train_normal <- predict(object = normal_para, newdata = train[, 3:16])
-test_normal <- predict(object = normal_para, newdata = test[, 3:16])
-library(dplyr)
-train <- mutate(train[, 2:2], train_normal)
-train <- cbind(train[, 2], train_normal)
-test <- mutate(test[, 2], test_normal)
-test <- cbind(test[, 2], test_normal)
-# 重命名
-colnames(train)[1] <- "oneyr"
-colnames(test)[1] <- "oneyr"
+# train <- subset(dt0, dt0$Group == "Training")
+# test <- subset(dt0, dt0$Group == "Test")
+# normal_para <- preProcess(x = train[, 3:16], method = c("center", "scale")) # 提取训练集的标准化参数
+# train_normal <- predict(object = normal_para, newdata = train[, 3:16])
+# test_normal <- predict(object = normal_para, newdata = test[, 3:16])
+# library(dplyr)
+# train <- mutate(train[, 2:2], train_normal)
+# train <- cbind(train[, 2], train_normal)
+# test <- mutate(test[, 2], test_normal)
+# test <- cbind(test[, 2], test_normal)
+# # 重命名
+# colnames(train)[1] <- "oneyr"
+# colnames(test)[1] <- "oneyr"
 
 # 数据预处理
 ep_rec <- recipe(oneyr ~ ., data = train) %>%
-  step_rm(ID) %>% # 移除这3列
-  step_string2factor(oneyr) %>%  # 变为因子类型
-  #update_role(yards_gained, game_id, new_role = "ID") %>% 
+  # step_rm(ID) %>% # 移除这3列
+  # step_string2factor(oneyr) %>% # 字符串型变量变为因子类型
+  # update_role(yards_gained, game_id, new_role = "ID") %>%
   # 去掉高度相关的变量
-  step_corr(all_numeric(), threshold = 0.7) %>% 
-  step_center(all_numeric()) %>%  # 中心化
-  step_zv(all_predictors())  # 去掉零方差变量
+  step_corr(all_numeric(), threshold = 0.7) %>%
+  step_center(all_numeric()) %>% # 中心化
+  step_zv(all_predictors()) # 去掉零方差变量
 # 选择模型
 # 直接选择4个模型，你想选几个都是可以的。
 lm_mod <- logistic_reg(mode = "classification", engine = "glm")
@@ -108,7 +110,8 @@ four_mods
 keep_pred <- control_resamples(save_pred = T, verbose = T)
 # 然后就是运行4个模型（目前一直是在训练集中），我们给它加速一下：
 library(doParallel)
-cl <- makePSOCKcluster(6) # 加速，用12个线程
+parallel::detectCores(logical = FALSE)
+cl <- makePSOCKcluster(12) # 加速，用12个线程
 registerDoParallel(cl)
 four_fits <- four_mods %>%
   workflow_map("fit_resamples",
@@ -130,33 +133,143 @@ collect_predictions(four_fits)
 four_fits %>% autoplot(metric = "roc_auc") + theme_bw()
 
 # 选择表现最好的应用于测试集：
-rand_res <- last_fit(rf_mod,pbp_rec,split_pbp)
+rand_res <- last_fit(rf_mod, ep_rec, split_ep)
 # 查看在测试集的模型表现：
 collect_metrics(rand_res) # test 中的模型表现
 
 # 使用其他指标查看模型表现：
 metricsets <- metric_set(accuracy, mcc, f_meas, j_index)
-collect_predictions(rand_res) %>% 
-  metricsets(truth = play_type, estimate = .pred_class)
+collect_predictions(rand_res) %>%
+  metricsets(truth = oneyr, estimate = .pred_class)
 
 # 可视化结果，喜闻乐见的混淆矩阵：
-collect_predictions(rand_res) %>% 
-  conf_mat(play_type,.pred_class) %>% 
+collect_predictions(rand_res) %>%
+  conf_mat(oneyr, .pred_class) %>%
   autoplot()
 
+# 计算auc
+collect_predictions(rand_res) %>%
+  # bind_cols(test %>% select(oneyr)) %>%
+  roc_auc(oneyr, .pred_0)
 # 喜闻乐见的ROC曲线：
-collect_predictions(rand_res) %>% 
-  roc_curve(play_type,.pred_pass) %>% 
+collect_predictions(rand_res) %>%
+  roc_curve(oneyr, .pred_0) %>%
   autoplot()
 
-############
+# roc_lm <- pred_lm %>%
+#   roc_curve(oneyr, .pred_0) %>%
+#   mutate(model = "logistic")
+# roc_knn <- pred_knn %>%
+#   roc_curve(oneyr, .pred_0) %>%
+#   mutate(model = "kknn")
+# roc_rf <- pred_rf %>%
+#   roc_curve(oneyr, .pred_0) %>%
+#   mutate(model = "randomforest")
+# roc_tree <- pred_tree %>%
+#   roc_curve(oneyr, .pred_0) %>%
+#   mutate(model = "decision tree")
+# rocs <- bind_rows(roc_lm, roc_knn, roc_rf, roc_tree) %>%
+#   ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
+#   geom_path(lwd = 1.2, alpha = 0.6) +
+#   geom_abline(lty = 3) +
+#   scale_color_brewer(palette = "Set1") +
+#   theme_minimal()
+# rocs
+
+# PR曲线
+collect_predictions(rand_res) %>%
+  pr_curve(oneyr, .pred_0) %>%
+  autoplot()
+
+# Gain_curve
+collect_predictions(rand_res) %>%
+  gain_curve(oneyr, .pred_0) %>%
+  autoplot()
+
+# Lift_curve：
+collect_predictions(rand_res) %>%
+  lift_curve(oneyr, .pred_0) %>%
+  autoplot()
+
+# 校准曲线
+res_calib_plot <- collect_predictions(rand_res) %>%
+  mutate(
+    pass = if_else(oneyr == "1", 1, 0),
+    pred_rnd = round(.pred_1, 2)
+  ) %>%
+  group_by(pred_rnd) %>%
+  summarize(
+    mean_pred = mean(.pred_0),
+    mean_obs = mean(pass),
+    n = n()
+  ) %>%
+  ggplot(aes(x = mean_pred, y = mean_obs)) +
+  geom_abline(linetype = "dashed") +
+  geom_point(aes(size = n), alpha = 0.5) +
+  theme_minimal() +
+  labs(
+    x = "Predicted Pass",
+    y = "Observed Pass"
+  ) +
+  coord_cartesian(
+    xlim = c(0, 1), ylim = c(0, 1)
+  )
+
+res_calib_plot
+
+# 计算准确率
+# bind_cols(test %>% select(oneyr)) %>%
+# accuracy(oneyr,.pred_class)
+collect_predictions(rand_res) %>%
+  accuracy(oneyr, .pred_class)
+
+
+#####################
+# Use Catboost with Tidymodels(https://www.r-bloggers.com/2020/08/how-to-use-catboost-with-tidymodels/)
+# Loading necessary packages and data
+library(janitor) # data cleaning
+library(dplyr) # data prep
+library(ggplot2) # visualisation
+library(rsample) # tidymodels
+library(recipes)
+library(parsnip)
+library(tune)
+library(dials)
+library(workflows)
+library(yardstick)
+library(treesnip)
+
+# speed up computation with parallel processing
+library(doParallel)
+all_cores <- parallel::detectCores(logical = FALSE)
+registerDoParallel(cores = all_cores)
+
+
+# 使用tidymodels搞定二分类资料多个模型评价和比较(https://mp.weixin.qq.com/s?__biz=MzUzOTQzNzU0NA==&mid=2247491853&idx=1&sn=3ea040b89b4d0dbe5ff1f9c2092e6d8f&chksm=facad18acdbd589c95b286641bc9a96a9f6a689950fc5f2dbc985db2360c670a6841ead32f27&scene=178&cur_album_id=2471700721298735105#rd)
 # 选择随机森林，建立workflow：
-rf_spec <- rand_forest(mode = "classification") %>% 
-  set_engine("ranger",importance = "permutation")
-rf_wflow <- workflow() %>% 
-  add_recipe(ep_rec) %>% 
+rf_spec <- rand_forest(mode = "classification") %>%
+  set_engine("ranger", importance = "permutation")
+rf_wflow <- workflow() %>%
+  add_recipe(ep_rec) %>%
   add_model(rf_spec)
 
 # 在训练集建模：
-fit_rf <- rf_wflow %>% 
+fit_rf <- rf_wflow %>%
   fit(train)
+
+# 应用于测试集：
+str(test)
+pred_rf <- test %>% select(oneyr) %>% 
+  bind_cols(predict(fit_rf, test, type = "prob")) %>% 
+  bind_cols(predict(fit_rf, test, type = "class"))
+
+# 模型评价
+pred_rf %>% metricsets(truth = oneyr, estimate = .pred_class)
+pred_rf %>% conf_mat(truth = oneyr, estimate = .pred_class)
+pred_rf %>% roc_auc(oneyr, .pred_0)
+
+# 可视化随机森林结果的变量重要性：
+library(vip)
+fit_rf %>% 
+  extract_fit_parsnip() %>% 
+  vip(num_features = 5)
