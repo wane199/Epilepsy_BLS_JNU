@@ -123,8 +123,29 @@ wrap_plots(ggsurvfit_build(p1)) +
                 left = 0.50, bottom = 0.55, right = 1.0, top = 1.0)
 
 
+# https://www.danieldsjoberg.com/ggsurvfit/
+library(ggsurvfit)
 
-
+p <- survfit2(Surv(time, status) ~ surg, data = df_colon) |>
+  ggsurvfit(linewidth = 1) +
+  add_confidence_interval() +
+  add_risktable() +
+  add_quantile(y_value = 0.6, color = "gray50", linewidth = 0.75)
+p
+p +
+  # limit plot to show 8 years and less
+  coord_cartesian(xlim = c(0, 8)) +
+  # update figure labels/titles
+  labs(
+    y = "Percentage Survival",
+    title = "Recurrence by Time From Surgery to Randomization",
+  ) +
+  # reduce padding on edges of figure and format axes
+  scale_y_continuous(label = scales::percent, 
+                     breaks = seq(0, 1, by = 0.2),
+                     expand = c(0.015, 0)) +
+  scale_x_continuous(breaks = 0:10, 
+                     expand = c(0.02, 0))
 
 
 
