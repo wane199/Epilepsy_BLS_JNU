@@ -172,6 +172,7 @@ p1 <- arm_plot + swimmer_points(df_points=ClinicalTrial.AE,id='id',time='time',n
 
 
 p1 +scale_fill_manual(name="Treatment",values=c('grey40',"#e41a1c", "#377eb8",1,'#4daf4a','grey90'))
+
 #####################################
 # 叠中叠，一行代码实现带有风险表的生存曲线插入子图(https://mp.weixin.qq.com/s?__biz=MzU4OTc0OTg2MA==&mid=2247500015&idx=1&sn=21902096c48ac75b40fa6af7195e289a&chksm=fdca4be4cabdc2f20e8e67760f503a4b3660ed8acfab96ae965b65ca4569295e9102c803e74f&mpshare=1&scene=1&srcid=0513p68Pd85YCXbx50UjJlB7&sharer_sharetime=1684423067245&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
 # 1. 加载数据
@@ -223,7 +224,7 @@ p2 <- survfit(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ 1, data = dt) %>%
 library(patchwork)
 wrap_plots(ggsurvfit_build(p1)) +
   inset_element(ggsurvfit_build(p2), 
-                left = 0.55, bottom = 0.60, right = 1.0, top = 1.0)
+                left = 0.55, bottom = 0.65, right = 1.0, top = 1.0)
 
 # https://www.danieldsjoberg.com/ggsurvfit/
 p <- survfit2(Surv(time, status) ~ surg, data = df_colon) |>
