@@ -159,3 +159,101 @@ auto_fit %>%
 # 3.7 绘制性能比较图
 autoplot(auto_fit, type = "rank", metric = c("auc", "accuracy")) +
   theme(legend.position = "none")
+
+
+
+###################################
+# 基于mlr3的全自动机器学习-mlr3automl代码示例(https://mp.weixin.qq.com/s?__biz=Mzg5MTg2ODA1MA==&mid=2247486673&idx=2&sn=ddfd4c42bc2104f4bfef160deced2e4f&chksm=cfc78a2cf8b0033af94511084f47a6edc27fc35731bb385017dbf644105b5beeae61693bd745&cur_album_id=2789575730761400322&scene=189#wechat_redirect)
+# 创建模型
+devtools::install_github('https://github.com/a-hanf/mlr3automl', dependencies = TRUE)
+library(mlr3)
+library(mlr3automl)
+
+iris_task = tsk("iris")
+iris_model = AutoML(iris_task)
+
+
+# 训练，预测和重采样
+# 在上面的代码中，我们的模型尚未训练。模型训练与mlr3中的训练和预测非常相似。我们使用train()方法，它需要一个训练索引向量作为附加参数。
+train_indices = sample(1:iris_task$nrow, 2/3*iris_task$nrow)
+iris_model$train(row_ids = train_indices)
+
+predict_indices = setdiff(1:iris_task$nrow, train_indices)
+predictions = iris_model$predict(row_ids = predict_indices)
+
+resampling_result = iris_model$resample()
+
+# 可解释模型
+dalex_explainer = iris_model$explain(iml_package = "DALEX")
+iml_explainer = iris_model$explain(iml_package = "iml")
+
+# compute and plot feature permutation importance using DALEX
+dalex_importance = DALEX::model_parts(dalex_explainer)
+# 变量重要性
+plot(dalex_importance)
+
+# partial dependency plot using iml package
+iml_pdp = iml::FeatureEffect$new(iml_explainer, feature="Sepal.Width", method="pdp")
+# 变量预测价值图
+plot(iml_pdp)
+
+# 创建一个具有自定义学习器和固定时间预算的回归模型。每次超参数评估都会在10秒后停止。经过300秒的培训后，调优将停止，并返回迄今为止获得的最佳结果。
+automl_model = AutoML(
+  task=tsk("mtcars"),
+  learner_list=c("regr.ranger", "regr.lm"),
+  learner_timeout=10,
+  runtime=300)
+
+library(mlr3pipelines)
+imbalanced_preproc = po("imputemean") %>>%
+  po("smote") %>>%
+  po("classweights", minor_weight=2)
+
+automl_model = AutoML(task=tsk("pima"),
+                      preprocessing = imbalanced_preproc) 
+
+
+library(paradox)
+new_params = ParamSet$new(list(
+  ParamInt$new("classif.kknn.k",
+               lower = 1, upper = 5, default = 3, tags = "kknn")))
+
+my_trafo = function(x, param_set) {
+  if ("classif.kknn.k" %in% names(x)) {
+    x[["classif.kknn.k"]] = 2^x[["classif.kknn.k"]]
+  }
+  return(x)
+}
+
+automl_model = AutoML(
+  task=tsk("iris"), 
+  learner_list="classif.kknn",
+  additional_params=new_params,
+  custom_trafo=my_trafo)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
