@@ -209,6 +209,71 @@ manual_rsf_explainer <- explain_survival(model = rsf,
                                          label = "manual rsf")
 
 
+##### Breakdown #####
+# 探索可解释性机器学习：Breakdown带你了解心脏病随机森林的预测关键(https://mp.weixin.qq.com/s?__biz=MzU4MTk3NzAxNA==&mid=2247485896&idx=1&sn=29f1eb56900bc5427901d769ae191654&chksm=fdbe1f11cac99607d9b69f698e2f51af72f1f07100e041f88a754e7fd68fb522250cadf6a2d0&scene=178&cur_album_id=3027341943300669440#rd)
+library("DALEX")
+library("iBreakDown")
+set.seed(123)
+model_titanic_glm <- glm(survived ~ gender + age + fare,
+                         data = titanic_imputed, family = "binomial")
+explain_titanic_glm <- explain(model_titanic_glm,
+                               data = titanic_imputed,
+                               y = titanic_imputed$survived,
+                               label = "glm")
+
+bd_glm <- break_down(explain_titanic_glm, titanic_imputed[1, ])
+bd_glm
+plot(bd_glm, max_features = 3)
+
+
+library("randomForest")
+set.seed(123)
+# example with interaction
+# classification for HR data
+model <- randomForest(status ~ . , data = HR)
+new_observation <- HR_test[1,]
+
+explainer_rf <- explain(model,
+                        data = HR[1:1000,1:5])
+
+bd_rf <- break_down(explainer_rf,
+                    new_observation)
+head(bd_rf)
+plot(bd_rf)
+
+
+# 描述使用的疾病预测数据集
+#「加载数据集和特征选择」
+library(survival)
+data(heart)
+data <- heart[,c("age","surgery","transplant","event")]
+data$age <- abs(data$age)
+head(data)
+
+# 运用随机森林模型进行心脏病预测
+# 加载依赖库」
+library(DALEX)
+library(randomForest)
+#「模型拟合」
+rf <- randomForest(event~., data=data)
+#「构建模型解释器」
+# 构建解释器
+rf_exp <- explain(rf,
+                  data = data[, -4],
+                  y = data$event,
+                  label = "randomForest")
+rf_exp
+
+#「breakdown解释」
+bd_rf <- break_down(rf_exp,new_observation = data[1, ])
+head(bd_rf)
+describe(bd_rf)
+plot(bd_rf)
+
+
+
+
+
 
 
 
