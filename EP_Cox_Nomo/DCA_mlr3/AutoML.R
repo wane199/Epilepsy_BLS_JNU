@@ -1,8 +1,9 @@
-#########################################
-## https://mp.weixin.qq.com/s?__biz=Mzg3ODg5MzU5NA==&mid=2247485627&idx=1&sn=ea4c37193d22ebef6de4f9913ff4e369&chksm=cf0d87cef87a0ed85627aa18245e6ff13f045fa865d82c932baffe2c6a148399965b2f91b1d3&mpshare=1&scene=1&srcid=0508mw4LEN8NGw5BjMmrAaNA&sharer_sharetime=1683513791848&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd
-## 自动机器学习（AutoML）(https://docs.h2o.ai/h2o/latest-stable/h2o-docs/explain.html?highlight=h2o%20pd_multi_plot)
+# https://docs.h2o.ai/h2o/latest-stable/h2o-docs/explain.html?highlight=h2o%20pd_multi_plot
+# https://www.bilibili.com/video/BV1g5411X7Fh/?spm_id_from=333.337.search-card.all.click&vd_source=23f183f0c5968777e138f31842bde0a0
+# https://mp.weixin.qq.com/s?__biz=Mzg3ODg5MzU5NA==&mid=2247485627&idx=1&sn=ea4c37193d22ebef6de4f9913ff4e369&chksm=cf0d87cef87a0ed85627aa18245e6ff13f045fa865d82c932baffe2c6a148399965b2f91b1d3&mpshare=1&scene=1&srcid=0508mw4LEN8NGw5BjMmrAaNA&sharer_sharetime=1683513791848&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd
+#### 自动机器学习（AutoML）####
 # 基于h2o机器学习框架的自动机器学习方法，并对自动机器学习模型进行解释。
-# 1、加载包和数据集
+##### 1、加载包和数据集 #####
 rm(list = ls())
 library(h2o)
 h2o.init() # 初始化
@@ -21,7 +22,7 @@ for (i in names(dt)[c(-2, -3, -6:-8)]) {
 str(dt)
 table(dt$oneyr) # 查看阳性结局
 
-# 2、构建自动机器学习模型
+##### 2、构建自动机器学习模型 #####
 # 2.1模型构建
 am <- h2o.automl(
   y = "oneyr",
@@ -36,7 +37,7 @@ b
 # 2.3 选取最优模型
 best <- h2o.get_best_model(am)
 
-# 3、模型表现
+##### 3、模型表现 #####
 perf <- h2o.performance(best)
 perf
 
@@ -53,7 +54,7 @@ h2o.varimp_plot(best)
 # 3.3 基于排列的变量重要性
 h2o.permutation_importance_plot(best, dt)
 
-# 4、模型解释
+##### 4、模型解释 #####
 # 4.1 SHAP summary plot
 h2o.shap_summary_plot(best, dt)
 
@@ -76,9 +77,9 @@ h2o.ice_plot(best,
 h2o.learning_curve_plot(best)
 
 
-###########################################
-# 基于Tidymodels的自动机器学习(https://mp.weixin.qq.com/s?__biz=Mzg3ODg5MzU5NA==&mid=2247485642&idx=1&sn=dcf03c1fddcfc3f6fbf4a24c3d6a21df&chksm=cf0d87bff87a0ea99924fdbecf737e9dbc5beb1294f8a32abb36f524f6ed2908b9c7ff5bafc4&cur_album_id=2792146949775884289&scene=190#rd)
-# 1、加载R包及数据处理
+#### 基于Tidymodels的自动机器学习 ####
+# https://mp.weixin.qq.com/s?__biz=Mzg3ODg5MzU5NA==&mid=2247485642&idx=1&sn=dcf03c1fddcfc3f6fbf4a24c3d6a21df&chksm=cf0d87bff87a0ea99924fdbecf737e9dbc5beb1294f8a32abb36f524f6ed2908b9c7ff5bafc4&cur_album_id=2792146949775884289&scene=190#rd
+##### 1、加载R包及数据处理 #####
 library(tidymodels)
 library(agua)
 library(ggplot2)
@@ -105,7 +106,7 @@ split <- initial_split(dt, strata = oneyr)
 train <- training(split)
 test <- testing(split)
 
-# 2、设置自动机器学习
+##### 2、设置自动机器学习 #####
 # 2.1设置自动机器学习模型
 auto_spec <-
   auto_ml() %>%
@@ -124,7 +125,7 @@ auto_wflow <-
 # 2.4 模型拟合
 auto_fit <- fit(auto_wflow, data = train)
 
-# 3、模型信息
+##### 3、模型信息 #####
 # 3.1 提取模型拟合结果
 extract_fit_parsnip(auto_fit) # 提取模型信息
 
@@ -162,8 +163,8 @@ autoplot(auto_fit, type = "rank", metric = c("auc", "accuracy")) +
 
 
 
-###################################
-# 基于mlr3的全自动机器学习-mlr3automl代码示例(https://mp.weixin.qq.com/s?__biz=Mzg5MTg2ODA1MA==&mid=2247486673&idx=2&sn=ddfd4c42bc2104f4bfef160deced2e4f&chksm=cfc78a2cf8b0033af94511084f47a6edc27fc35731bb385017dbf644105b5beeae61693bd745&cur_album_id=2789575730761400322&scene=189#wechat_redirect)
+#### 基于mlr3的全自动机器学习-mlr3automl代码示例 ####
+# https://mp.weixin.qq.com/s?__biz=Mzg5MTg2ODA1MA==&mid=2247486673&idx=2&sn=ddfd4c42bc2104f4bfef160deced2e4f&chksm=cfc78a2cf8b0033af94511084f47a6edc27fc35731bb385017dbf644105b5beeae61693bd745&cur_album_id=2789575730761400322&scene=189#wechat_redirect
 # 创建模型
 devtools::install_github('https://github.com/a-hanf/mlr3automl', dependencies = TRUE)
 library(mlr3)
