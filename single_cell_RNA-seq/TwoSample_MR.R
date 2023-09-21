@@ -1,12 +1,28 @@
-# (TwoSample MR Practical)[https://zhuanlan.zhihu.com/p/605966100]
+##### TwoSample MR Practical #####
+# https://zhuanlan.zhihu.com/p/605966100
+# 判断是否已经安装了“pacman”包I如果没有就安装它
+if (!require("pacman")) install.packages("pacman", update = F, ask = F)
+# 设置Bioconductor镜像地址为中国科技大学的镜像
+options(BioC_mirror = "https://mirrors.ustc.edu.cn/bioc/")
+# 加载“pacman”包，用于方便加载其他的R包
+library("pacman") # Package Management Tool
+# 使用“p_load”函数加载所需的R包
+p_load(
+ggplot2,               # CRAN v3.4.3
+readr                  # CRAN v2.1.4
+)
+p_load_gh("MRCIEU/MRInstruments")
+
+
+# 在加载这些包之前，“pacman“会先检查是否已经安装，如果没有会自动安装
 install.packages(c("devtools", "knitr", "rmarkdown"))
-library(devtools)
+library(devtools) # Tools to Make Developing R Packages Easier
 install_github(c("MRCIEU/TwoSampleMR", "MRCIEU/MRInstruments"))
 install_github("WSpiller/MRPracticals", build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
 install_github("WSpiller/MRPracticals", build_opts = c("--no-resave-data", "--no-manual"))
-library(TwoSampleMR)
-library(MRInstruments)
-library(MRPracticals)
+library(TwoSampleMR) # Two Sample MR Functions and Interface to MR Base Database
+library(MRInstruments) # [github::MRCIEU/MRInstruments] v0.3.2 
+library(MRPracticals)  # [github::WSpiller/MRPracticals] v0.0.1 
 
 ## Step 1: 获取暴露摘要估计
 ### GWAS 目录
@@ -51,19 +67,19 @@ H_data <- harmonise_data(
   outcome_dat = outcome_data
 )
 
-### 重复条目 
+### 重复条目
 H_data <- power_prune(H_data)
 
 ## Step 3 进行MR分析
 ### 获取效应估计值
-mr_results<-mr(H_data)
+mr_results <- mr(H_data)
 mr_results
 
-mr(H_data, method_list=c("mr_egger_regression", "mr_ivw"))
+mr(H_data, method_list = c("mr_egger_regression", "mr_ivw"))
 
 mr_method_list()
 
-head(mr_method_list())[,1:2]
+head(mr_method_list())[, 1:2]
 
 ### 生成具有 95% 置信区间的OR值
 generate_odds_ratios(mr_results) # 请注意，本例中的分析使用的是连续结局变量
@@ -71,7 +87,7 @@ generate_odds_ratios(mr_results) # 请注意，本例中的分析使用的是连
 ### 敏感性分析
 mr_pleiotropy_test(H_data)
 
-mr_heterogeneity(H_data, method_list=c("mr_egger_regression", "mr_ivw"))
+mr_heterogeneity(H_data, method_list = c("mr_egger_regression", "mr_ivw"))
 
 ### 生成MR结果的图示
 plot1 <- mr_scatter_plot(mr_results, H_data)
@@ -90,3 +106,4 @@ plot4
 
 
 
+##### 药物靶基因孟德尔随机化 #####
