@@ -1,9 +1,9 @@
 # chromoMap provides interactive, configurable and elegant graphics visualization of chromosomes or chromosomal regions allowing users to map chromosome features (like genes,SNPs etc.) onto the chromosome and visualize the feature-associated data (like multi-omics data). Each chromosome is composed of genomic-windows(representing a specific range determined based on chromosome length) that, on hover, shows details about the annotations in that locus range. The plots can be saved as HTML documents that can be shared easily. In addition, you can include them in R Markdown or in R Shiny applications
 # https://cran.r-project.org/web/packages/chromoMap/vignettes/chromoMap.html#Session_Info
 ##### Install chromoMap #####
-install.packages("chromoMap")
-install.packages("RIdeogram")
-??chromosome_map
+# install.packages("chromoMap")
+# install.packages("RIdeogram")
+
 ##### Prepare Input Data Files #####
 # chromoMap files for this vignette
 # chromosome files
