@@ -8,8 +8,8 @@ options(BioC_mirror = "https://mirrors.ustc.edu.cn/bioc/")
 library("pacman") # Package Management Tool
 # 使用“p_load”函数加载所需的R包
 p_load(
-ggplot2,               # CRAN v3.4.3
-readr                  # CRAN v2.1.4
+  ggplot2, # CRAN v3.4.3
+  readr # CRAN v2.1.4
 )
 p_load_gh("MRCIEU/MRInstruments")
 
@@ -21,8 +21,8 @@ install_github(c("MRCIEU/TwoSampleMR", "MRCIEU/MRInstruments"))
 install_github("WSpiller/MRPracticals", build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
 install_github("WSpiller/MRPracticals", build_opts = c("--no-resave-data", "--no-manual"))
 library(TwoSampleMR) # Two Sample MR Functions and Interface to MR Base Database
-library(MRInstruments) # [github::MRCIEU/MRInstruments] v0.3.2 
-library(MRPracticals)  # [github::WSpiller/MRPracticals] v0.0.1 
+library(MRInstruments) # [github::MRCIEU/MRInstruments] v0.3.2
+library(MRPracticals) # [github::WSpiller/MRPracticals] v0.0.1
 
 ## Step 1: 获取暴露摘要估计
 ### GWAS 目录
@@ -107,3 +107,73 @@ plot4
 
 
 ##### 药物靶基因孟德尔随机化 #####
+# 判断是否已经安装了“pacman”包I如果没有就安装它
+if (!require("pacman")) install.packages("pacman", update = F, ask = F)
+# 设置Bioconductor镜像地址为中国科技大学的镜像
+options(BioC_mirror = "https://mirrors.ustc.edu.cn/bioc/")
+# 加载“pacman”包，用于方便加载其他的R包
+library("pacman") # Package Management Tool
+# 使用“p_load”函数加载所需的R包
+p_load(
+  ggplot2, # CRAN v3.4.3
+  readr # CRAN v2.1.4
+)
+p_load_gh("MRCIEU/MRInstruments")
+
+library(TwoSampleMR) # Two Sample MR Functions and Interface to MR Base Database
+library(Matrix)
+library(MendelianRandomization)
+
+# 暴露数据
+# ebi-a-GCST90018926	2021	Type 2 diabetes	NA	490,089	24,167,560
+expofile <- "ebi-a-GCST90018926"
+# 靶基因位点
+# TBC1D24 chr16	2475127	2505730	2495030
+# RS_2023_03	current	GRCh38.p14 (GCF_000001405.40)	20	NC_000020.11 (44355699..44434596)
+chr_pos <- 20 # 染色体位置
+pos_start <- 44355699 # 开始位置
+pos_end <- 44434596 # 结束位置
+
+# 结局数据
+# ebi-a-GCST90018840	2021	Epilepsy	NA	458,310	24,186,492
+# ukb-b-20124	2018	Heel bone mineral density (BMD) T-score, automated	MRC-IEU	265,753	9,851,867
+outcfile <- "ebi-a-GCST90018840"
+
+# 在线读取gwas数据
+# 提取检测的SNP,存到biof_exposure_dat中
+biof_exposure_dat <- extract_instruments(
+  outcome = expofile,
+  clump = FALSE
+)
+
+# 进行连锁不平衡刷除
+biof_exposure_dat <- clump_data(biof_exposure_dat,
+  clump_kb = 100, # 定义连锁不平衡窗口大小
+  clump_r2 = 0.3, # 定义连锁不平衡的R平方阈值
+  clump_p1 = 5e-08, # 保留p值最小的SNP
+  clump_p2 = 5e-08 # 删除p值大于阈值的SNP
+)
+
+# 获取去除连锁不平衡后的行数和列数
+dim(biof_exposure_dat)
+view(biof_exposure_dat)
+
+# 提取药物靶点周围的SNP
+# subset函数从biof_exposure_dat筛选SNP
+# chr.exposure==chr_pos:chromosome与药物靶点chromosome相等
+# pos.exposure>pos_start-100000:SNP位置大于靶点start位置左侧100k!
+# pos . exposure < pos_end + 100000: SNP位置小于靶点end位置右侧100kb
+# 这样提取出药物靶点周围±100kb的SNP
+Drug_Target_SNP <- subset(biof_exposure_dat,
+                          chr.exposure == chr_pos &
+                                   pos.exposure > pos_start - 100000 &
+                                   pos.exposure < pos_end + 100000)
+                          
+# 将结果写入csv文件
+# Drug_Target_SNP:提取的药物靶点周围SNP
+# "Drug_Target_SNP.csv": 输出的csv文件名
+write.csv(Drug_Target_SNP, file = "Drug_Target_SNP,csv")
+# 查看结果
+
+
+
