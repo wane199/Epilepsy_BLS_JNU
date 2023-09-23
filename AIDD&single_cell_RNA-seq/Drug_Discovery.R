@@ -36,7 +36,7 @@ x <- rbind(x1, x2)
 # Make class labels
 labels <- as.factor(c(rep(0, length(extracell)), rep(1, length(mitonchon))))
 
-set.seed(1001)
+set.seed(123)
 
 # Split training and test set
 tr.idx <- c(
@@ -75,7 +75,7 @@ RI.csv <- system.file(
 )
 
 x.mol <- readMolFromSmi(RI.smi, type = "mol")
-x.tab <- read.table(RI.csv, sep = "\t", header = TRUE)
+x.tab <- read.table(RI.csv, sep = " ", header = TRUE)
 y <- x.tab$RI
 
 # Calculate selected molecular descriptors
@@ -100,7 +100,7 @@ ctrl <- trainControl(
 )
 
 # Train a PLS model
-set.seed(1002)
+set.seed(123)
 pls.fit <- train(
   x, y,
   method = "pls", tuneLength = 10, trControl = ctrl,
