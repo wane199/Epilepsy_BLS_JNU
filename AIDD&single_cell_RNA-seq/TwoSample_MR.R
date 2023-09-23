@@ -176,4 +176,55 @@ write.csv(Drug_Target_SNP, file = "Drug_Target_SNP,csv")
 # 查看结果
 
 
+# View(biof_Outcome_dat)
+write.csv(biof_Outcome_dat, file="biof_Outcome_dat.csv")
+
+# 从Outcome数据中提取与药物靶点SNP相关的表型数据
+biof_Outcome_dat <- extract_outcome_data(
+  snps = Drug_Target_SNP$SNP, # 药物靶点SNP
+  outcomes = outcfile)  # 表型数据文件
+  
+# harmonize and merge数据
+# 确保SNP对暴露和结果的效应基于同一等位基因
+harmonise_dat <- harmonise_data(
+    exposure_dat = Drug_Target_SNP, # 药物靶点SNP数据
+    outcome_dat = biof_Outcome_dat, # 相关表型数据
+    action = 1)   # 调和方法
+
+# 查看harmonise后的数据
+View(harmonise_dat)
+
+# 将结果写入文件
+#将结果写入文件
+write.table(harmonise_dat,
+            "expo_outc_harmonise.csv",
+            row.names = F,
+            sep = "\t",
+            quote = F)
+# 去除混杂因素
+p_load(MendelianRandomization,purrr,readr)
+# 设置变量grp_size,用于设置每个分组的SNP数量
+grp_size <- 100
+
+# 将data中的SNP分成多个大小为grp_size的分组，保存到变量grps中
+grps <- split(harmonise_dat$SNP,ceiling(seq_along(harmonise_dat$SNP)/grp_size))
+
+# 通过phenoscanner API对每个分组进行关联分析
+# map_dfr将结果合并为一个数据框
+# 对grps中的每个分组运行phenoscanner API进行关联分析
+results <- map_dfr(grps, ~phenoscanner(snpquery=.×, #,x表示传入的分组
+                                       catalogue="GwAS",#在GNAS目录中援索
+                                       pvalue=1e-05,#p值阔值设置为1e-05
+                                       proxies="None",#不使用代理SNP
+                                       r2=0.8,#相关性阀值设置为0.8
+                                       build=37)$resu1ts)#基因组版本为b37
+
+# 将关联结果写入文件confounder07.csy
+write_csv(results,"confounder.csv")
+View(results)
+
+
+
+
+
 
