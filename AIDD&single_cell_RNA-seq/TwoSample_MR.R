@@ -195,7 +195,6 @@ harmonise_dat <- harmonise_data(
 View(harmonise_dat)
 
 # 将结果写入文件
-#将结果写入文件
 write.table(harmonise_dat,
             "expo_outc_harmonise.csv",
             row.names = F,
