@@ -128,8 +128,8 @@ library(MendelianRandomization)
 # ebi-a-GCST90018926	2021	Type 2 diabetes	NA	490,089	24,167,560
 expofile <- "ebi-a-GCST90018926"
 # 靶基因位点
-# TBC1D24 chr16	2475127	2505730	2495030
-# RS_2023_03	current	GRCh38.p14 (GCF_000001405.40)	20	NC_000020.11 (44355699..44434596)
+# TBC1D24: GRCh38.p14 (GCF_000001405.40)	16	NC_000016.10 (2475127..2505730)
+# HNF4A: GRCh38.p14 (GCF_000001405.40)	20	NC_000020.11 (44355699..44434596)
 chr_pos <- 20 # 染色体位置
 pos_start <- 44355699 # 开始位置
 pos_end <- 44434596 # 结束位置
@@ -173,18 +173,14 @@ Drug_Target_SNP <- subset(biof_exposure_dat,
 # Drug_Target_SNP:提取的药物靶点周围SNP
 # "Drug_Target_SNP.csv": 输出的csv文件名
 write.csv(Drug_Target_SNP, file = "Drug_Target_SNP,csv")
-# 查看结果
 
-
-# View(biof_Outcome_dat)
-write.csv(biof_Outcome_dat, file="biof_Outcome_dat.csv")
-
+# load outcome data找到和结局相关性的snp
 # 从Outcome数据中提取与药物靶点SNP相关的表型数据
 biof_Outcome_dat <- extract_outcome_data(
   snps = Drug_Target_SNP$SNP, # 药物靶点SNP
   outcomes = outcfile)  # 表型数据文件
   
-# harmonize and merge数据
+# harmonize and merge 数据
 # 确保SNP对暴露和结果的效应基于同一等位基因
 harmonise_dat <- harmonise_data(
     exposure_dat = Drug_Target_SNP, # 药物靶点SNP数据
@@ -200,6 +196,7 @@ write.table(harmonise_dat,
             row.names = F,
             sep = "\t",
             quote = F)
+
 # 去除混杂因素
 p_load(MendelianRandomization,purrr,readr)
 # 设置变量grp_size,用于设置每个分组的SNP数量
@@ -216,14 +213,34 @@ results <- map_dfr(grps, ~phenoscanner(snpquery=.×, #,x表示传入的分组
                                        pvalue=1e-05,#p值阔值设置为1e-05
                                        proxies="None",#不使用代理SNP
                                        r2=0.8,#相关性阀值设置为0.8
-                                       build=37)$resu1ts)#基因组版本为b37
+                                       build=38)$resu1ts)#基因组版本为b38
 
 # 将关联结果写入文件confounder07.csy
 write_csv(results,"confounder.csv")
 View(results)
 
+# 设置变量remove_snps,用于保存要移除的混杂因素snp
+remove_snps <- c("rs766466","rs2456973","rs9739070")
 
+# 移除含有混杂SNP的行
+harmonise_dat <- harmonise_dat[!harmonise_dat$SNP %in% remove_snps,]
 
+# 将移除混杂因素后的结果写入clean_confounder07.csv
+write_csv(harmonise_dat,"clean_confounder.csv")
 
+res = mr(harmonise_dat)
+res
+write.csv(res, file="MRres.csv")
 
+# mendelian randomization(MR)analysis
+MR_result <- mr(harmonise_dat)
+# View(MR_result)
+result_OR=generate_odds_ratios(MR_result)
+# 靶基因对疾病的关系，药物是抑制剂还是促进剂，
+result_ORSor1=1/result_OR$or 
+
+result_OR$or_lci951 = result_OR$or1-1.96*result_OR$se
+result_ORSor_uci951 = result_OR$or1+1.96*result_OR$se
+write.table(result_OR[,5:ncol(result_OR)],"MR_OR.xls",
+            row.names = F, sep = "\t", quote = F)
 
