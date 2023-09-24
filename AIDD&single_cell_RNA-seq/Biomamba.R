@@ -4,7 +4,7 @@ if (!require(multtest)) install.packages("multtest")
 if (!require(Seurat)) install.packages("Seurat")
 if (!require(dplyr)) install.packages("dplyr")
 if (!require(mindr)) install.packages("mindr")
-if (!require(mindr)) install.packages("tidyverse")
+if (!require(tidyverse)) install.packages("tidyverse")
 ##### 自动读取cellranger(LINUX)输出的feature barcode matric
 rm(list = ls())
 pbmc.data <- Read10X(data.dir = "C:\\Users\\wane1\\Downloads\\第二课各类数据结构及读取方法\\filtered_gene_bc_matrices\\hg19\\")
