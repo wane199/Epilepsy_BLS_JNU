@@ -75,7 +75,7 @@ RI.csv <- system.file(
 )
 
 x.mol <- readMolFromSmi(RI.smi, type = "mol")
-x.tab <- read.table(RI.csv, sep = " ", header = TRUE)
+x.tab <- read.table(RI.csv, sep = "\t", header = TRUE)
 y <- x.tab$RI
 
 # Calculate selected molecular descriptors
@@ -143,7 +143,7 @@ x2 <- x2[, -nearZeroVar(x2)]
 x3 <- x3[, -nearZeroVar(x3)]
 
 # Split training and test set
-set.seed(1003)
+set.seed(123)
 tr.idx <- sample(1:nrow(x1), round(nrow(x1) * 0.75))
 te.idx <- setdiff(1:nrow(x1), tr.idx)
 x1.tr <- x1[tr.idx, ]
@@ -160,7 +160,7 @@ library("kernlab")
 
 # Cross-validation settings
 ctrl <- trainControl(
-  method = "cv", number = 5, repeats = 10,
+  method = "cv", number = 5, # repeats = 100,
   classProbs = TRUE,
   summaryFunction = twoClassSummary
 )

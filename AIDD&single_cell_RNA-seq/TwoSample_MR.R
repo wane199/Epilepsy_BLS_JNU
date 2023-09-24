@@ -107,6 +107,7 @@ plot4
 
 
 ##### 药物靶基因孟德尔随机化 #####
+# https://www.bilibili.com/video/BV1BN411p7ZD/?p=6&spm_id_from=pageDriver&vd_source=23f183f0c5968777e138f31842bde0a0
 # 判断是否已经安装了“pacman”包I如果没有就安装它
 if (!require("pacman")) install.packages("pacman", update = F, ask = F)
 # 设置Bioconductor镜像地址为中国科技大学的镜像
