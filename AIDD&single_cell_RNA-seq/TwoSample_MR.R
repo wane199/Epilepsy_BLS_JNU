@@ -143,16 +143,16 @@ outcfile <- "ebi-a-GCST90018840"
 # 在线读取gwas数据
 # 提取检测的SNP,存到biof_exposure_dat中
 biof_exposure_dat <- extract_instruments(
-  outcome = expofile,
-  clump = FALSE
+                    outcome = expofile,
+                    clump = FALSE
 )
 
 # 进行连锁不平衡刷除
 biof_exposure_dat <- clump_data(biof_exposure_dat,
-  clump_kb = 100, # 定义连锁不平衡窗口大小
-  clump_r2 = 0.3, # 定义连锁不平衡的R平方阈值
-  clump_p1 = 5e-08, # 保留p值最小的SNP
-  clump_p2 = 5e-08 # 删除p值大于阈值的SNP
+                                clump_kb = 100, # 定义连锁不平衡窗口大小
+                                clump_r2 = 0.3, # 定义连锁不平衡的R平方阈值
+                                clump_p1 = 5e-08, # 保留p值最小的SNP
+                                clump_p2 = 5e-08 # 删除p值大于阈值的SNP
 )
 
 # 获取去除连锁不平衡后的行数和列数
@@ -178,9 +178,9 @@ write.csv(Drug_Target_SNP, file = "Drug_Target_SNP,csv")
 # load outcome data找到和结局相关性的snp
 # 从Outcome数据中提取与药物靶点SNP相关的表型数据
 biof_Outcome_dat <- extract_outcome_data(
-  snps = Drug_Target_SNP$SNP, # 药物靶点SNP
-  outcomes = outcfile)  # 表型数据文件
-  
+                    snps = Drug_Target_SNP$SNP, # 药物靶点SNP
+                    outcomes = outcfile)  # 表型数据文件
+                    
 # harmonize and merge 数据
 # 确保SNP对暴露和结果的效应基于同一等位基因
 harmonise_dat <- harmonise_data(
