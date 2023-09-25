@@ -245,3 +245,18 @@ result_ORSor_uci951 = result_OR$or1+1.96*result_OR$se
 write.table(result_OR[,5:ncol(result_OR)],"MR_OR.xls",
             row.names = F, sep = "\t", quote = F)
 
+mr_heterogeneity(harmonise_dat, method_list=c("mr_egger_regression","mr_ivw")) # 异质性检验
+# outlier test
+run_mr_presso(harmonise_dat, NbDistribution=1000) # 偏倚检验
+pleio <-mr_pleiotropy_test(harmonise_dat) # 多效性检验--MR egger
+# View(pleio)
+write.csv(pleio,file="pleio.csv") # 多效性结果
+
+single <- mr_leaveoneout(harmonise_dat)
+mr_leaveoneout_plot(single) # 留一法检验敏感性
+write.csv(single, file = "single.csv")
+
+
+
+
+
