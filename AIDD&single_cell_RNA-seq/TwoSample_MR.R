@@ -256,7 +256,8 @@ single <- mr_leaveoneout(harmonise_dat)
 mr_leaveoneout_plot(single) # 留一法检验敏感性
 write.csv(single, file = "single.csv")
 
-
+p1 <-mr_scatter_plot(res,harmonise_dat) # 散点图
+ggsave(p1[[1]], file = "scatter.pdf", width = 8, height = 8)
 
 
 
