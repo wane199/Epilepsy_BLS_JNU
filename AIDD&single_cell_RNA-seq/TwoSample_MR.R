@@ -257,7 +257,23 @@ mr_leaveoneout_plot(single) # 留一法检验敏感性
 write.csv(single, file = "single.csv")
 
 p1 <-mr_scatter_plot(res,harmonise_dat) # 散点图
+p1
 ggsave(p1[[1]], file = "scatter.pdf", width = 8, height = 8)
 
 
+# 单SNP分析
+res_single = mr_singlesnp(harmonise_dat)
+# 绘制森林图，森林图可以表示每个SNP与结果的关联效应。
+p2 <- mr_forest_plot(res_single)
+p2[[1]]
+ggsave(p2[[1]],file="forest.pdf",width=8,height=8)
+# 绘制漏斗图
+p3 <- mr_funnel_plot(singlesnp_results = res_single)
+p3[[1]]
+ggsave(p3[[1]],file="funnel_plot.pdf",width=8,height=8)
+
+# 留一法敏感性分析
+p4 <- mr_leaveoneout_plot(leaveoneout_results=mr_leaveoneout(harmonise_dat))
+p4[[1]]
+ggsave(p4[[1]],file="leaveoneout.pdf",width=8,height=8)
 
