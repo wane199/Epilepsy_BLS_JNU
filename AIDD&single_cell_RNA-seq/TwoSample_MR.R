@@ -105,6 +105,104 @@ plot4 <- mr_funnel_plot(res_single)
 plot4
 
 
+##### 中介孟德尔随机化 #####
+# https://mp.weixin.qq.com/s?__biz=Mzg5NjgwMzAzNQ==&mid=2247484020&idx=1&sn=71941a4d0d049a579da7324f09dad7c7&chksm=c07acbc0f70d42d60ad9251e4152feaadd7c908dce5b287e3ddaf2db01b12d4048ff36d100b2&mpshare=1&scene=1&srcid=0926XRKstADEkmt4HGh9iy7x&sharer_shareinfo=8d92a27f4cb892329551633b3390bf53&sharer_shareinfo_first=8d92a27f4cb892329551633b3390bf53#rd
+# install packages
+install.packages("devtools")
+devtools::install_github("MRCIEU/TwoSampleMR")
+# install.packages("ggplot2")
+
+# library
+library(TwoSampleMR)
+library(kableExtra)
+library(ggplot2)
+library(cowplot)
+
+# set up your work directory
+setwd("")
+
+# two step 
+###### step 1 X to Y TSMR(得到总效应，beta_all) ######
+expo_rt<-extract_instruments(outcome="ukb-b-20124",clump = FALSE)
+expo_rt<-clump_data(expo_rt,clump_kb = 10000,
+                    clump_r2 = 0.001,
+                    clump_p1 = 5e-08,
+                    clump_p2 = 5e-08,
+)
+
+outc_rt <- extract_outcome_data(expo_rt$SNP, outcomes = "finn-b-M13_ATLOAXSUBLUX")
+
+
+harm_rt <- harmonise_data(
+  exposure_dat =  expo_rt, 
+  outcome_dat = outc_rt,action=2)
+
+mr_result<- mr(harm_rt)
+View(mr_result)
+result_or=generate_odds_ratios(mr_result)
+write.table(result_or[,5:ncol(result_or)],"OR1.txt",row.names = F,sep = "\t",quote = F)
+
+###### step 2 Y to X TSMR(确定可以做中介) ######
+expo_rt2<-extract_instruments(outcome="finn-b-M13_ATLOAXSUBLUX",clump = FALSE)
+expo_rt2<-clump_data(expo_rt,clump_kb = 10000,
+                     clump_r2 = 0.001,
+                     clump_p1 = 5e-08,
+                     clump_p2 = 5e-08,
+)
+
+outc_rt2 <- extract_outcome_data(expo_rt2$SNP, outcomes = "ukb-b-20124")
+
+harm_rt2 <- harmonise_data(
+  exposure_dat =  expo_rt2, 
+  outcome_dat = outc_rt2,action=2)
+
+mr_result2<- mr(harm_rt2)
+View(mr_result2)
+result_or2=generate_odds_ratios(mr_result2)
+write.table(result_or2[,5:ncol(result_or2)],"OR2.txt",row.names = F,sep = "\t",quote = F)
+
+###### step 3 X to X' TSMR(得到beta1) ######
+expo_rt3<-expo_rt
+outc_rt3 <- extract_outcome_data(expo_rt3$SNP, outcomes = "ieu-b-4764")
+
+harm_rt3 <- harmonise_data(
+  exposure_dat =  expo_rt3, 
+  outcome_dat = outc_rt3,action=2)
+write.table(harm_rt3, "harmonise3.txt",row.names = F,sep = "\t",quote = F)
+
+mr_result3<- mr(harm_rt3)
+View(mr_result3)
+result_or3=generate_odds_ratios(mr_result3)
+write.table(result_or3[,5:ncol(result_or3)],"OR3.txt",row.names = F,sep = "\t",quote = F)
+
+###### step 4 X' to Y TSMR(得到beta2) ######
+expo_rt4<-extract_instruments(outcome="ieu-b-4764",clump = FALSE)
+expo_rt4<-clump_data(expo_rt4,clump_kb = 10000,
+                     clump_r2 = 0.001,
+                     clump_p1 = 5e-08,
+                     clump_p2 = 5e-08,
+)
+
+outc_rt4 <- extract_outcome_data(expo_rt4$SNP, outcomes = "finn-b-M13_ATLOAXSUBLUX")
+
+harm_rt4 <- harmonise_data(
+  exposure_dat =  expo_rt4, 
+  outcome_dat = outc_rt4,action=2)
+write.table(harm_rt4, "harmonise4.txt",row.names = F,sep = "\t",quote = F)
+
+mr_result4<- mr(harm_rt4)
+View(mr_result4)
+result_or4=generate_odds_ratios(mr_result4)
+write.table(result_or4[,5:ncol(result_or4)],"OR4.txt",row.names = F,sep = "\t",quote = F)
+
+# 中介效应(乘积法) beta12=beta1*beta2
+# https://www.bilibili.com/video/BV1Th4y1C7Je/?spm_id_from=333.788&vd_source=23f183f0c5968777e138f31842bde0a0
+# 第一种中介效应 = 两样本（暴露 -> 中介）× 两样本（中介 -> 暴露）
+product_method_PoE(EM_beta, EM_se, Mo_beta_total, Mo_se_total)
+
+# 直接效应
+beta_dir=beta_all-beta12
+
 
 ##### 药物靶基因孟德尔随机化 #####
 # https://www.bilibili.com/video/BV1BN411p7ZD/?p=6&spm_id_from=pageDriver&vd_source=23f183f0c5968777e138f31842bde0a0
