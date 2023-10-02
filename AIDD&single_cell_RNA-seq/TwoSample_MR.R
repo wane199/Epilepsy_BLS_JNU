@@ -23,9 +23,11 @@ install_github("WSpiller/MRPracticals", build_opts = c("--no-resave-data", "--no
 library(TwoSampleMR) # Two Sample MR Functions and Interface to MR Base Database
 library(MRInstruments) # [github::MRCIEU/MRInstruments] v0.3.2
 library(MRPracticals) # [github::WSpiller/MRPracticals] v0.0.1
+library(doParallel) # 并行
 
 ## Step 1: 获取暴露摘要估计
 ### GWAS 目录
+rm(list = ls())
 data(gwas_catalog)
 exposure_gwas <- subset(gwas_catalog, grepl("Blood", Phenotype_simple))
 exposure_gwas <- subset(gwas_catalog, grepl("Neale", Author))
@@ -245,7 +247,29 @@ biof_exposure_dat <- extract_instruments(
                     clump = FALSE
 )
 
-# 进行连锁不平衡刷除
+# 读取本地文件
+{
+biof_exposure_dat <- read_exposure_data(
+            filename = "myexprosure.txt", # SNP
+            sep = "\t",
+            snp_Col = "SNP",
+            beta_col = "Beta",
+            se_col = "SE",
+            effect_allele_col = "Effect_allele",
+            other_allele_col = "Other_allele",
+            pval_col = "P",
+            eaf_col = "EAF",
+            chr_col = "CHR",
+            pos_col = "BP"
+)
+
+# data filter
+biof_exposure_dat <- biof_exposure_dat[biof_exposure_dat$pval.exposure < 1e-8,]
+biof_exposure_dat <- clump_data(biof_exposure_dat,clump_kb = 100,
+                                 c1ump_r2 = 0.3)
+}
+
+# 进行连锁不平衡剔除
 biof_exposure_dat <- clump_data(biof_exposure_dat,
                                 clump_kb = 100, # 定义连锁不平衡窗口大小
                                 clump_r2 = 0.3, # 定义连锁不平衡的R平方阈值
@@ -259,9 +283,9 @@ view(biof_exposure_dat)
 
 # 提取药物靶点周围的SNP
 # subset函数从biof_exposure_dat筛选SNP
-# chr.exposure==chr_pos:chromosome与药物靶点chromosome相等
-# pos.exposure>pos_start-100000:SNP位置大于靶点start位置左侧100k!
-# pos . exposure < pos_end + 100000: SNP位置小于靶点end位置右侧100kb
+# chr.exposure == chr_pos:chromosome与药物靶点chromosome相等
+# pos.exposure > pos_start - 100000:SNP位置大于靶点start位置左侧100kb
+# pos.exposure < pos_end + 100000: SNP位置小于靶点end位置右侧100kb
 # 这样提取出药物靶点周围±100kb的SNP
 Drug_Target_SNP <- subset(biof_exposure_dat,
                           chr.exposure == chr_pos &
@@ -274,17 +298,34 @@ Drug_Target_SNP <- subset(biof_exposure_dat,
 write.csv(Drug_Target_SNP, file = "Drug_Target_SNP,csv")
 
 # load outcome data找到和结局相关性的snp
+# 读取本地结局数据
+{
+  biof_Outcome_dat <- read_outcome_data(
+    snps = Drug_Target_SNP$SNP,
+    filename = "CAD_OUTCOME.txt",
+    sep = "\t",
+    snp_col = "markername",
+    beta_col ="beta",
+    se_col = "standard_error",
+    effect_allele_col = "effect_allele",
+    other_allele_col = "noneffect_allele", # other_allele
+    eaf_col = "effect_allele_frequency",
+    pval_col = "p_value")
+  
+  # View(biof_Outcome_dat)
+  write.csv(biof_Outcome_dat, file="biof_Outcome_dat.csv")
+}
+
 # 从Outcome数据中提取与药物靶点SNP相关的表型数据
 biof_Outcome_dat <- extract_outcome_data(
-                    snps = Drug_Target_SNP$SNP, # 药物靶点SNP
-                    outcomes = outcfile)  # 表型数据文件
-                    
+                                         snps = Drug_Target_SNP$SNP, # 药物靶点SNP
+                                         outcomes = outcfile)  # 表型数据文件
 # harmonize and merge 数据
 # 确保SNP对暴露和结果的效应基于同一等位基因
 harmonise_dat <- harmonise_data(
-    exposure_dat = Drug_Target_SNP, # 药物靶点SNP数据
-    outcome_dat = biof_Outcome_dat, # 相关表型数据
-    action = 1)   # 调和方法
+                                exposure_dat = Drug_Target_SNP, # 药物靶点SNP数据
+                                outcome_dat = biof_Outcome_dat, # 相关表型数据
+                                action = 1)   # 调和方法
 
 # 查看harmonise后的数据
 View(harmonise_dat)
@@ -324,7 +365,7 @@ remove_snps <- c("rs766466","rs2456973","rs9739070")
 # 移除含有混杂SNP的行
 harmonise_dat <- harmonise_dat[!harmonise_dat$SNP %in% remove_snps,]
 
-# 将移除混杂因素后的结果写入clean_confounder07.csv
+# 将移除混杂因素后的结果写入clean_confounder.csv
 write_csv(harmonise_dat,"clean_confounder.csv")
 
 res = mr(harmonise_dat)
@@ -335,18 +376,18 @@ write.csv(res, file="MRres.csv")
 MR_result <- mr(harmonise_dat)
 # View(MR_result)
 result_OR=generate_odds_ratios(MR_result)
-# 靶基因对疾病的关系，药物是抑制剂还是促进剂，
-result_ORSor1=1/result_OR$or 
+# 靶基因对疾病的关系:正/负相关，药物是抑制剂还是促进剂，
+result_OR$or1=1/result_OR$or 
 
 result_OR$or_lci951 = result_OR$or1-1.96*result_OR$se
-result_ORSor_uci951 = result_OR$or1+1.96*result_OR$se
+result_OR$or_uci951 = result_OR$or1+1.96*result_OR$se
 write.table(result_OR[,5:ncol(result_OR)],"MR_OR.xls",
             row.names = F, sep = "\t", quote = F)
 
 mr_heterogeneity(harmonise_dat, method_list=c("mr_egger_regression","mr_ivw")) # 异质性检验
 # outlier test
 run_mr_presso(harmonise_dat, NbDistribution=1000) # 偏倚检验
-pleio <-mr_pleiotropy_test(harmonise_dat) # 多效性检验--MR egger
+pleio <- mr_pleiotropy_test(harmonise_dat) # 多效性检验--MR egger
 # View(pleio)
 write.csv(pleio,file="pleio.csv") # 多效性结果
 
@@ -354,7 +395,7 @@ single <- mr_leaveoneout(harmonise_dat)
 mr_leaveoneout_plot(single) # 留一法检验敏感性
 write.csv(single, file = "single.csv")
 
-p1 <-mr_scatter_plot(res,harmonise_dat) # 散点图
+p1 <- mr_scatter_plot(res,harmonise_dat) # 散点图
 p1
 ggsave(p1[[1]], file = "scatter.pdf", width = 8, height = 8)
 
@@ -374,4 +415,80 @@ ggsave(p3[[1]],file="funnel_plot.pdf",width=8,height=8)
 p4 <- mr_leaveoneout_plot(leaveoneout_results=mr_leaveoneout(harmonise_dat))
 p4[[1]]
 ggsave(p4[[1]],file="leaveoneout.pdf",width=8,height=8)
+
+# 合并MR结果，绘制森林图
+# 使用"p_load"函数加载所需的R包
+p_load(forestploter,grid,ggplot2)
+
+# 定义变量mrresultsfile,用于存储MR结果文件的文件名
+mrresultsfile = "MRresults.txt"
+# 使用read.table()函数读取MR结果文件
+# 文件名为mrresultsfile变量的值"MRresults.txt"
+# header = T表示文件第一行作为变量名
+# sep = "\t”表示列之间使用制表符分隔
+biofsci = read.table(mrresultsfile,header = T,sep = "\t")
+
+# 处理P值的显示格式
+# 对biofsci数据集的P.value字段进行处理
+# 使用ifelse()进行条件判断
+# 如果P.va1ue小于0.001显示"<0.001"
+# 否则使用sprintf()格式化显示P值到小数点后4位
+biofsci$P.value = ifelse(biofsci$P.value < 0.001, "<0.001",
+                         sprintf("%.4f",biofsci$P.value))
+
+# 处理NA值，使用ifelse()对多个字段进行处理
+# 如果值为NA,则替换为""
+biofsci$Target = ifelse(is.na(biofsci$Target),"",biofsci$Target)
+biofsci$Method = ifelse(is.na(biofsci$Method),"",biofsci$Method)
+biofsci$NSNP = ifelse(is.na(biofsci$NSNP),"",biofsci$NSNP)
+biofsci$P.value = ifelse(is.na(biofsci$P.value),"",biofsci$p.value)
+
+# 添加空格用于格式调整
+# 使用rep()函数重复生成20个空格字符
+# 使用paste()用空格拼接成一个字符串
+# 赋值给新生成的变量biofsci''
+biofscis$' ' <- paste(rep(" ", 20), collapse = " ")
+
+# 处理OR值的显示格式
+# 使用ifelse()对0R字段进行处理
+# 如果0R是NA,显示""，否则显示格式化的0R值和95%可信区间
+biofsci$'OR (95% CI)' <- ifelse(is.na(biofsci$OR),"",
+                             sprintf("%.4f (%.4f to %.4f)",
+                                     biofsci$OR,biofsci$OR_lci95,
+                                     biofsci$OR_uci95))
+
+# 设置森林图的主题，定义图形元素的是示格式
+# 使用forest_theme()函数
+# 定义基础字体大小，参考线颜色，脚注格式等参数
+tm <- forest_theme(base_size = 10,
+                   refline_col = "red",
+                   footnote_col = "#636363",
+                   footnote_fontface = "italic")
+
+# 绘制森林图
+# 使用forest()函数，传递数据及参数
+# biofsci[,c(1:5,9:10)]:选择需要的列数据
+# est/lower/upper:OR值和置信区间
+# arrowlab:曲线两个方向的标签文本
+# sizes:点的大小
+# ci_column:置信区间所在列
+# ref_line:添加参考线
+# xlim:x轴范围
+# footnote:脚注
+# theme:使用设置的主题对象
+p=forest(biofsci[,c(1:5,9:10)],
+         est = biofsci$OR,
+         lower = biofsci$OR_lci95,
+         upper = biofsci$OR_uci95,
+         # arrow_lab = c("Placebo Better","Treatment Better").
+         sizes = 0.4,
+         ci_column = 6,
+         ref_line = 1,
+         xlim = c(0.05,3),
+         footnote = "",
+         theme = tm)
+P
+
+ggsave(p,file="forest.pdf",width=8,height=28)
+
 
