@@ -247,7 +247,7 @@ biof_exposure_dat <- extract_instruments(
                     clump = FALSE
 )
 
-# 读取本地文件
+# 读取本地暴露文件
 {
 biof_exposure_dat <- read_exposure_data(
             filename = "myexprosure.txt", # SNP
@@ -298,6 +298,11 @@ Drug_Target_SNP <- subset(biof_exposure_dat,
 write.csv(Drug_Target_SNP, file = "Drug_Target_SNP,csv")
 
 # load outcome data找到和结局相关性的snp
+# 从Outcome数据中提取与药物靶点SNP相关的表型数据
+biof_Outcome_dat <- extract_outcome_data(
+                                         snps = Drug_Target_SNP$SNP, # 药物靶点SNP
+                                         outcomes = outcfile)  # 表型数据文件
+
 # 读取本地结局数据
 {
   biof_Outcome_dat <- read_outcome_data(
@@ -316,10 +321,6 @@ write.csv(Drug_Target_SNP, file = "Drug_Target_SNP,csv")
   write.csv(biof_Outcome_dat, file="biof_Outcome_dat.csv")
 }
 
-# 从Outcome数据中提取与药物靶点SNP相关的表型数据
-biof_Outcome_dat <- extract_outcome_data(
-                                         snps = Drug_Target_SNP$SNP, # 药物靶点SNP
-                                         outcomes = outcfile)  # 表型数据文件
 # harmonize and merge 数据
 # 确保SNP对暴露和结果的效应基于同一等位基因
 harmonise_dat <- harmonise_data(
