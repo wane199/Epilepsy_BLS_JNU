@@ -1,5 +1,5 @@
 ##### Mendelian Randomization Analyses #####
-# https://www.bilibili.com/video/BV1Vu411H7EH/?spm_id_from=pageDriver&vd_source=23f183f0c5968777e138f31842bde0a0
+# 自动寻找孟德尔随机化阳性暴露因素https://www.bilibili.com/video/BV1Vu411H7EH/?spm_id_from=pageDriver&vd_source=23f183f0c5968777e138f31842bde0a0
 # https://blog.csdn.net/Timo_CSDN/article/details/123183047
 # MR-Base platform数据库上找到合适的数据集作为暴露，然后再找到合适的数据集作为结局
 # 安装相关的R包
