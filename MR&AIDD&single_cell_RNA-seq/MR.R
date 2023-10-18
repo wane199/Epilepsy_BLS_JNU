@@ -343,7 +343,9 @@ mr_steiger(
 )
 
 ###### 读取本地文件 ######
+library(data.table)
 a <- fread("准备文件/EA4_additive_excl_23andMe.txt", header = T) # f # fread读取大文件
+ep <- fread("C:/Users/wane/Downloads/药物靶向MR/FINNGEN/finngen_R9_FE.gz", header = T)
 head(a) # 查看p_value列名
 b <- subset(a, P < 5e-06)
 Education <- format_data(
