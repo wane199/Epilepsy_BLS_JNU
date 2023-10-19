@@ -493,3 +493,33 @@ P
 ggsave(p,file="forest.pdf",width=8,height=28)
 
 
+# ..\\Downloads\\药物靶向MR\\药靶课程更新\\15分药靶（贝叶斯共定位分析）
+library(TwoSampleMR)
+library(data.table)
+library(MRInstruments)
+library(MRPRESSO)
+
+
+ldsc_gwas<-extract_instruments(outcome="ieu-a-300",clump = FALSE)
+
+ldsc_gwas<-clump_data(ldsc_gwas,clump_kb = 100,
+                      clump_r2 = 0.3,
+                      clump_p1 = 5e-08,
+                      clump_p2 = 5e-08,
+                      pop = "EUR")
+
+HMGCR_gwas<-subset(ldsc_gwas,chr.exposure==5 & pos.exposure>74632993-100000 & pos.exposure<74657941+100000)
+PCSK9_gwas<-subset(ldsc_gwas,chr.exposure==1 & pos.exposure>55505221-100000 & pos.exposure<55530525+100000)
+NPC1L1_gwas<-subset(ldsc_gwas,chr.exposure==7 & pos.exposure>44552134-100000 & pos.exposure<44580929+100000)
+
+HMGCR_gwas<-subset(HMGCR_gwas,eaf.exposure>0.01)
+PCSK9_gwas<-subset(PCSK9_gwas,eaf.exposure>0.01)
+NPC1L1_gwas<-subset(NPC1L1_gwas,eaf.exposure>0.01)
+
+#ieu-a-7	Coronary heart disease
+HMGCR_CHD_gwas <- extract_outcome_data(snps = HMGCR_gwas$SNP,
+                                       outcomes = 'ieu-a-7')
+
+dat <- harmonise_data(HMGCR_gwas,HMGCR_CHD_gwas)
+res3 <- mr(dat)
+res3
