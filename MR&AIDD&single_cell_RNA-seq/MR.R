@@ -16,8 +16,8 @@ library(MendelianRandomization)
 ## Get GWAS data from the IEU GWAS database that rooted in the package
 ao <- available_outcomes()
 # getwd()
-# write.csv(ao, "C:\\Users\\wane1\\Documents\\file\\sci\\Shuntak\\MR\\ao_2023_08_06.csv")
-ao <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\Shuntak\\MR\\ao_2023_08_06.csv")
+write.csv(ao, "C:\\Users\\wane1\\Documents\\file\\sci\\Shuntak\\MR\\ao_2023_10_23.csv")
+ao08 <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\Shuntak\\MR\\ao_2023_08_06.csv")
 # 根据id和trait提取组学数据
 # [代谢物] #  a b c d四个数据来源
 metabolites <- ao[grep("met", ao$id), ]
@@ -25,6 +25,8 @@ metabolites <- ao[grep("met", ao$id), ]
 protein <- ao[grep("prot", ao$id), ]
 # [菌群]就是Mibiogen上面的 #详细着菌群推文
 bacteria <- ao[grep("Gut microbiota abundance", ao$trait), ]
+# 癫痫疾病相关数据集
+epilepsy <- ao[grepl("*pilepsy", ao$trait), ]
 # [eQTL]
 eQTL <- ao[grep("eqtl", ao$id), ]
 ## 提取FinnGen的数据信息
@@ -33,7 +35,7 @@ finn <- ao[grep("finn", ao$id), ]
 ao[ao$id == "ieu-a-7", c("sample_size", "ncase", "ncontrol")]
 
 ## 提取工具变量（以eqtl为例）
-results <- extract_instruments(outcomes = eQTL$id, p1 = 1e-5, clump = TRUE)
+results <- extract_instruments(outcomes = epilepsy$id, p1 = 1e-5, clump = TRUE)
 # 如频繁网络中断，可for循环追加
 # 保留，下次可以直接调用，进行不同结局探索
 df_dat_exp <- rbind(results, res)
@@ -42,15 +44,15 @@ df_dat_exp <- rbind(results, res)
 df_dat_exp <- NULL
 for (i in 1:1000) {
   res <- extract_instruments(
-    outcomes = eQTL$id[i], p1 = 1e-5,
+    outcomes = epilepsy$id[i], p1 = 1e-5,
     clump = TRUE
   )
   # 保留，下次可以直接调用，迹行不同结同探素
   df_dat_exp <- rbind(df_dat_exp, res)
 }
 
-saveRDS(df_dat_exp, "C:\\Users\\wane1\\Documents\\file\\sci\\Shuntak\\MR\\eQTL_exp_dat.rds")
-df_dat_exp <- readRDS("C:\\Users\\wane1\\Documents\\file\\sci\\Shuntak\\MR\\eQTL_exp_dat.rds")
+saveRDS(df_dat_exp, "C:\\Users\\wane1\\Documents\\file\\sci\\Shuntak\\MR\\epilepsy_exp_dat.rds")
+df_dat_exp <- readRDS("C:\\Users\\wane1\\Documents\\file\\sci\\Shuntak\\MR\\epilepsy_exp_dat.rds")
 
 
 ##### -一键寻找暴露因素,[提供初步筛选] #####
