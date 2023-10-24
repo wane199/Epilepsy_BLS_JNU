@@ -1,8 +1,12 @@
+#### MR之后生信分析 ####
+## MR之后根据目标遗传变异SNP寻找HUB基因，利用基因疾病关联数据库，进行疾病相关基因的研究。
+## 做生物信息分析，然后研究功能通路的改变，再用实验验证，本节首先绘制基因-疾病网络图、进行富集分析等，
 # https://www.disgenet.org/static/disgenet2r/disgenet2r.html
-# Installation and first run
-library(devtools)
-install_bitbucket("ibi_group/disgenet2r")
-
+##### Installation and first run #####
+# library(devtools)
+# install_bitbucket("ibi_group/disgenet2r")
+# 
+rm(list = ls())
 library(disgenet2r)
 disgenet_api_key <- get_disgenet_api_key(
   email = "wane199@outlook.com",
@@ -10,8 +14,8 @@ disgenet_api_key <- get_disgenet_api_key(
 )
 Sys.setenv(DISGENET_API_KEY = disgenet_api_key)
 
-# Retrieving Gene-Disease Associations from DisGeNET
-# Searching by gene
+##### Retrieving Gene-Disease Associations from DisGeNET #####
+###### Searching by gene ######
 data1 <- gene2disease(
   gene = 6334, vocabulary = "ENTREZ",
   database = "ALL"
@@ -21,7 +25,8 @@ data1
 
 results <- extract(data1)
 head(results, 3)
-# Figure 1: The Gene-Disease Network for the SCN8A gene
+###### Visualizing the diseases associated to a single gene ######
+# Figure 1: The Gene-Disease Network for the SCN8A gene 
 plot(data1,
   class = "Network",
   prop = 20
@@ -32,7 +37,7 @@ plot(data1,
   prop = 3
 )
 
-# Exploring the evidences associated to a gene
+###### Exploring the evidences associated to a gene ######
 data1 <- gene2evidence(
   gene = "SCN8A",
   vocabulary = "HGNC",
@@ -104,7 +109,7 @@ plot(data3,
   class = "ProteinClass"
 )
 
-# Exploring the evidences associated to a disease
+##### Exploring the evidences associated to a disease #####
 data3 <- disease2evidence(
   disease = "C0014544",
   type = "GDA",
@@ -122,7 +127,7 @@ data3 <- disease2evidence(
 data3
 results <- extract(data3)
 
-# Searching multiple diseases
+###### Searching multiple diseases ######
 diseasesOfInterest <- c("C0036341", "C0002395", "C0030567", "C0005586", "C0014544")
 data5 <- disease2gene(
   disease = diseasesOfInterest,
@@ -130,7 +135,7 @@ data5 <- disease2gene(
   score = c(0.4, 1),
   verbose = TRUE
 )
-# Visualizing the genes associated to multiple diseases
+###### Visualizing the genes associated to multiple diseases ######
 plot(data5,
   class = "Network",
   prop = 10
@@ -145,13 +150,51 @@ plot(data5,
   class = "ProteinClass"
 )
 
-# Retrieving Variant-Disease Associations from DisGeNET
-# Searching by variant
-data6 <- variant2disease( variant= "rs121913279",
-                          database = "CURATED")
+##### Retrieving Variant-Disease Associations from DisGeNET #####
+###### Searching by variant ######
+data6 <- variant2disease( variant= "rs2844697", # rs2844697、rs9273368
+                          database = "ALL")
 data6
 
+###### Visualizing the diseases associated to a single variant ######
+# Figure 11: The Variant-Disease Network for the variant rs121913279
+plot( data6, 
+      class = "Network",
+      prop  = 10)
 
+# Figure 12: The Variant- Disease Class Network for the variant rs121913279
+plot( data6,
+      class = "DiseaseClass",
+      prop = 3)
+
+##### Exploring the evidences associated to a variant #####
+###### Searching multiple variants ######
+data7 <- variant2disease(
+  variant = c("rs121913013", "rs1060500621",
+              "rs199472709", "rs72552293",
+              "rs74315445", "rs199472795"),
+  database = "ALL")
+
+###### Visualizing the diseases associated to multiple variants ######
+plot( data7,
+      class = "Network",
+      prop = 10)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### Get DisGeNET data version #####
+get_disgenet_version()
 
 
 
