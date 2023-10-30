@@ -17,7 +17,7 @@ Sys.setenv(DISGENET_API_KEY = disgenet_api_key)
 ##### Searching by gene #####
 # https://www.ncbi.nlm.nih.gov/gene/
 data1 <- gene2disease(
-  gene = 6323, vocabulary = "ENTREZ", # SCN1A
+  gene = 6323, vocabulary = "ENTREZ", # SCN1A、GABRG2(Flumazenil)
   database = "ALL"
 )
 class(data1)
@@ -39,7 +39,7 @@ plot(data1,
 
 ###### Exploring the evidences associated to a gene ######
 data1 <- gene2evidence(
-  gene = "SCN1A",
+  gene = "GABRG2", # SCN1A、GABRG2
   vocabulary = "HGNC",
   disease = "C0014544", # MeSH
   database = "ALL",
@@ -50,7 +50,7 @@ results <- extract(data1)
 head(results)
 
 ##### Searching multiple genes #####
-myListOfGenes <- c("SCN1A", "TBC1D24", "El1", "SAMD12", "STARD7")
+myListOfGenes <- c("SCN1A", "GABRG2", "TBC1D24", "El1", "SAMD12", "STARD7")
 data2 <- gene2disease(
   gene = myListOfGenes,
   score = c(0.2, 1),
