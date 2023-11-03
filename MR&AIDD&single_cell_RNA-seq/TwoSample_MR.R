@@ -209,6 +209,8 @@ beta_dir=beta_all-beta12
 ##### 药物靶基因孟德尔随机化 #####
 # https://www.bilibili.com/video/BV1BN411p7ZD/?p=6&spm_id_from=pageDriver&vd_source=23f183f0c5968777e138f31842bde0a0
 # 判断是否已经安装了“pacman”包I如果没有就安装它
+rm(list = ls())
+getwd()
 if (!require("pacman")) install.packages("pacman", update = F, ask = F)
 # 设置Bioconductor镜像地址为中国科技大学的镜像
 options(BioC_mirror = "https://mirrors.ustc.edu.cn/bioc/")
@@ -227,18 +229,21 @@ library(MendelianRandomization)
 
 # 暴露数据
 # ebi-a-GCST90018926	2021	Type 2 diabetes	NA	490,089	24,167,560
-expofile <- "ebi-a-GCST90018926"
+# ebi-a-GCST90026412	2021	Severe autoimmune type 2 diabetes	NA	3,196	5,376,535
+expofile <- "ebi-a-GCST90026412"
+
 # 靶基因位点
-# TBC1D24: GRCh38.p14 (GCF_000001405.40)	16	NC_000016.10 (2475127..2505730)
-# HNF4A: GRCh38.p14 (GCF_000001405.40)	20	NC_000020.11 (44355699..44434596)
-chr_pos <- 20 # 染色体位置
-pos_start <- 44355699 # 开始位置
-pos_end <- 44434596 # 结束位置
+# TBC1D24、HNF4A
+# GABRG2：105.20220307	previous assembly	GRCh37.p13 (GCF_000001405.25)	5	NC_000005.9 (161494471..161582545)
+chr_pos <- 5 # 染色体位置
+pos_start <- 161494471 # 开始位置
+pos_end <- 161582545 # 结束位置
 
 # 结局数据
 # ebi-a-GCST90018840	2021	Epilepsy	NA	458,310	24,186,492
 # ukb-b-20124	2018	Heel bone mineral density (BMD) T-score, automated	MRC-IEU	265,753	9,851,867
-outcfile <- "ebi-a-GCST90018840"
+# finn-b-FE	2021	Focal epilepsy	NA	—	16,380,452
+outcfile <- "finn-b-FE"
 
 # 在线读取gwas数据
 # 提取检测的SNP,存到biof_exposure_dat中
