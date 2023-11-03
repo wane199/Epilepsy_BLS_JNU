@@ -271,7 +271,7 @@ biof_exposure_dat <- read_exposure_data(
 # data filter
 biof_exposure_dat <- biof_exposure_dat[biof_exposure_dat$pval.exposure < 1e-8,]
 biof_exposure_dat <- clump_data(biof_exposure_dat,clump_kb = 100,
-                                 c1ump_r2 = 0.3)
+                                 clump_r2 = 0.3)
 }
 
 # 进行连锁不平衡剔除
@@ -284,7 +284,7 @@ biof_exposure_dat <- clump_data(biof_exposure_dat,
 
 # 获取去除连锁不平衡后的行数和列数
 dim(biof_exposure_dat)
-view(biof_exposure_dat)
+View(biof_exposure_dat)
 
 # 提取药物靶点周围的SNP
 # subset函数从biof_exposure_dat筛选SNP
@@ -355,8 +355,8 @@ grps <- split(harmonise_dat$SNP,ceiling(seq_along(harmonise_dat$SNP)/grp_size))
 # map_dfr将结果合并为一个数据框
 # 对grps中的每个分组运行phenoscanner API进行关联分析
 results <- map_dfr(grps, ~phenoscanner(snpquery=.×, #,x表示传入的分组
-                                       catalogue="GwAS",#在GNAS目录中援索
-                                       pvalue=1e-05,#p值阔值设置为1e-05
+                                       catalogue="GWAS",#在GWAS目录中搜索
+                                       pvalue=1e-05,#p值阈值设置为1e-05
                                        proxies="None",#不使用代理SNP
                                        r2=0.8,#相关性阀值设置为0.8
                                        build=38)$resu1ts)#基因组版本为b38
