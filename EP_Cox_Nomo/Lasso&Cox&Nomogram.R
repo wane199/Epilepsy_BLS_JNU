@@ -25,6 +25,7 @@ dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.c
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234-points.csv")
 # dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\cph2\\TLE220group.csv")
 dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\TLE234group.csv")
+dt <- read.csv("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\XML\\TLE_XML_1125\\dataset_XML.csv",sep = ";")
 
 table(dt$Freq)
 dt <- dt[c(-1:-3)]
@@ -511,6 +512,7 @@ print(CreateTableOne(data = testset), showAllLevels = TRUE)
 tabMat <- print(tab, staquote = FALSE, noSpaces = TRUE, printToggle = FALSE, showAllLevels = TRUE)
 ## 保存为 CSV 格式文件
 write.csv(tabMat, file = "/media/wane/Data/CN/t1myTable.csv")
+write.csv(tabMat, file = "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\XML\\TLE_XML_1125\\traintable1.csv")
 
 # 最佳cutoff值
 library(cutoff)
