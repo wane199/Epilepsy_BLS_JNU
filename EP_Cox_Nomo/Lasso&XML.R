@@ -12,19 +12,22 @@ list.files() ## 列出工作目录下的文件
 options(digits = 4) # 限定输出小数点后数字的位数为3位
 library(glmnet) ## Lasso回归、岭回归、弹性网络模型
 library(caret) ## 标准化及混淆矩阵
-library(survival) ## 生存分析包, 包括非参数(Kaplan-Meier分析)和半参数(CPH), 参数模型(参数比例，附加危害，AFT)
+library(survival)        # CRAN v3.5-7 ## 生存分析包, 包括非参数(Kaplan-Meier分析)和半参数(CPH), 参数模型(参数比例，附加危害，AFT)
 library(survminer) # ggforest
-library(rms) ## 画列线图
-library(randomForest)
-library(dplyr)
-library(survIDINRI)
-library(My.stepwise)
+library(rms)             # CRAN v6.7-1 ## 画列线图
+library(randomForest)    # CRAN v4.7-1.1
+library(dplyr)           # CRAN v1.1.3
+library(survIDINRI)      # CRAN v1.1-2 # CRAN v1.1-2
+library(My.stepwise)     # CRAN v0.1.0 # CRAN v0.1.0
+library(writexl)         # CRAN v1.4.2
 
 #### 读取数据集 ####
-dt <- read.csv("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_AI.csv")
-dt1 <- read.csv("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_lateral.csv")
+# dt <- read.csv("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_AI.csv")
+# dt1 <- read.csv("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_lateral.csv")
 # dt2 <- subset(dt1, dt1$label == 1)
-# write.csv(dt2,"C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_lateral.csv")
+dt <- readxl::read_xlsx("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_AI.xlsx")
+dt1 <- readxl::read_xlsx("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_lateral.xlsx")
+# write_xlsx(dt,"C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_AI.xlsx")
 
 table(dt$Freq)
 dt <- dt[c(-1:-3)]
@@ -71,7 +74,7 @@ train1 <- as.data.frame(scale(train[5:1136])) # 自变量Z-score标准化
 test1 <- as.data.frame(scale(test[5:1136]))
 train <- mutate(train[, 3:4], train1)
 test <- mutate(test[, 3:4], test1)
-# library(dplyr)
+# library(dplyr)         # CRAN v1.1.3
 train %>%
   select_if(~ !any(is.na(.))) -> train # 删除全是缺失值的列
 test %>%
@@ -90,7 +93,7 @@ prop.table(table(test$Follow_up_timemon))
 prop.table(table(train$Rel._in_5yrs))
 prop.table(table(test$Rel._in_5yrs))
 
-## [影像组学导论R语言实现冗余性分析/影像组学导论--冗余性分析(pearson OR spearman)](https://mp.weixin.qq.com/s?__biz=MzAwMjIwMTIzNA==&mid=2247484813&idx=1&sn=d43f4897c8be4eac54ca0fa357bed0cc&chksm=9acf4670adb8cf664fbba4a32d13acb196b9c0c95a05b0266389509538596cd067bef8e0dde9&mpshare=1&scene=1&srcid=06062ez3l3xMK1pmRJqIDjzv&sharer_sharetime=1654487807730&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
+#                        # [影像组学导论R语言实现冗余性分析/影像组学导论--冗余性分析(pearson OR spearman)](https://mp.weixin.qq.com/s?__biz=MzAwMjIwMTIzNA==&mid=2247484813&idx=1&sn=d43f4897c8be4eac54ca0fa357bed0cc&chksm=9acf4670adb8cf664fbba4a32d13acb196b9c0c95a05b0266389509538596cd067bef8e0dde9&mpshare=1&scene=1&srcid=06062ez3l3xMK1pmRJqIDjzv&sharer_sharetime=1654487807730&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
 # 9.feature selection: reduce redundancy
 # 9.1 calculate p of normality test
 trainx <- train[3:1120]
@@ -145,11 +148,11 @@ fitcv1
 lasso_selection
 plot(x = lasso_selection, las = 1, xlab = "log(lambda)") # Fig2
 # 给每一副子图加上序号，tag_level选a，表示用小写字母来标注
-library(cowplot)
+library(cowplot)         # CRAN v1.1.1
 plot_grid(p1, p2, labels = c("a", "b"))
 
 # lasso回归结果美化
-library(tidyverse)
+library(tidyverse)       # CRAN v2.0.0 # CRAN v2.0.0
 tmp <- as_tibble(as.matrix(coef(nocv_lasso)), rownames = "coef") %>%
   pivot_longer(
     cols = -coef,
@@ -189,15 +192,15 @@ ggplot(tmp, aes(norm, value, color = coef, group = coef)) +
   theme_bw()
 
 library(broom) # 模型统计结果输出
-library(textreg)
+library(textreg)         # CRAN v0.1.5
 # 提取数据，就是这么简单！
 tidy_df <- broom::tidy(lasso_selection)
 tidy_cvdf <- broom::tidy(fitcv)
 head(tidy_df)
 tidy_df
 head(tidy_cvdf)
-library(ggplot2)
-library(RColorBrewer)
+library(ggplot2)         # CRAN v3.4.4
+library(RColorBrewer)    # CRAN v1.1-3
 mypalette <- c(brewer.pal(11, "BrBG"), brewer.pal(11, "Spectral"), brewer.pal(5, "Accent"))
 
 ggplot(tidy_df, aes(lambda, estimate, group = nzero, color = nzero)) +
@@ -376,10 +379,10 @@ for (i in names(dt1)[c(6, 8, 9, 13:22)]) {
 train <- subset(dt1, dt1$Group == "Training")
 test <- subset(dt1, dt1$Group == "Test")
 # Training vs. Test set
-library(ggstatsplot)
-library(palmerpenguins)
-library(tidyverse)
-library(patchwork)
+library(ggstatsplot)     # CRAN v0.12.1
+library(palmerpenguins)  # CRAN v0.1.1
+library(tidyverse)       # CRAN v2.0.0 # CRAN v2.0.0
+library(patchwork)       # CRAN v1.1.3
 p1 <- ggbetweenstats(
   data = train,
   x = Rel._in_5yrs,
@@ -405,8 +408,8 @@ p2 <- ggbetweenstats(
   ggtitle("Test Set") +
   ggeasy::easy_center_title()
 
-library(ggpubr)
-library(ggsci)
+library(ggpubr)          # CRAN v0.6.0
+library(ggsci)           # CRAN v3.0.0
 # 根据变量分面绘制箱线图
 dt$Group <- factor(dt$Group, levels = c("Training", "Test")) # 调整分面顺序
 p <- ggboxplot(dt,
@@ -447,7 +450,7 @@ ggarrange(p1, p2,
   common.legend = TRUE, legend = "right"
 )
 # tableone 基线特征描述统计
-library(autoReg)
+library(autoReg)         # CRAN v0.3.3 # CRAN v0.3.3
 for (i in names(dt)[c(7, 10:11, 15:24)]) {
   dt[, i] <- as.factor(dt[, i])
 }
@@ -461,12 +464,12 @@ for (i in names(test)[c(7, 10:11, 15:24)]) {
 ft <- gaze(Group ~ ., data = dt[c(-1:-2, -4:-5)]) %>% myft()
 ft <- gaze(Rel._in_5yrs ~ ., data = test[c(-1:-5)]) %>% myft()
 ft
-library(rrtable)
+library(rrtable)         # CRAN v0.3.0
 table2pptx(ft) # Exported table as Report.pptx
 table2docx(ft) # Exported table as Report.docx
 table2docx(ft, title = "test", append = TRUE, vanilla = TRUE)
 
-library(gtsummary)
+library(gtsummary)       # CRAN v1.7.2
 t <- tbl_summary(test,
   by = "Rel._in_5yrs", digits = list(all_continuous() ~ 1),
   # label=list(age~'AGE',smoking~'Smoking'),
@@ -487,7 +490,7 @@ t_7 <- bold_labels(t_6)
 final_result <- bold_p(t_7)
 final_result
 
-library(CBCgrps)
+library(CBCgrps)         # CRAN v2.8.2
 # 当样本量大于等于50时，采用kolmogorov-Smirnov检验；样本量小于50时，采用Shapiro-Wilk检验。
 ks.test(dt[14]) # 样本量大于等于50
 unlist(names(dt[c(8:9, 12:14)]))
@@ -498,7 +501,7 @@ tab1 <- twogrps(dt[c(-1:-5)], gvar = "Rel._in_5yrs", skewvar = c("AI_radscore", 
 print(tab1, quote = T)
 write.csv(tab1[1], "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\table1_220.csv", row.names = F)
 # 基线资料汇总，tableone
-library(tableone)
+library(tableone)        # CRAN v0.13.2
 ## 需要转为分类变量的变量
 catVars <- unlist(names(dt[c(7, 10:11, 15:24)]))
 catVars
@@ -514,7 +517,7 @@ write.csv(tabMat, file = "/media/wane/Data/CN/t1myTable.csv")
 write.csv(tabMat, file = "C:\\Users\\wane1\\Documents\\file\\sci\\cph\\XML\\TLE_XML_1125\\traintable1.csv")
 
 # 最佳cutoff值
-library(cutoff)
+library(cutoff)          # CRAN v1.3 # CRAN v1.3
 str(train)
 train$Rel._in_5yrs <- as.numeric(as.character(train$Rel._in_5yrs))
 train$Rel._in_5yrs <- as.factor(train$Rel._in_5yrs)
@@ -604,8 +607,8 @@ dt <- read.csv("/home/wane/Desktop/EP/sci/cph/TLE234group_factor.csv")
 train <- subset(dt, dt$Group1 == "Training")
 test <- subset(dt, dt$Group1 == "Test")
 
-library(dlookr)
-library(DataExplorer)
+library(dlookr)          # CRAN v0.6.2
+library(DataExplorer)    # CRAN v0.8.2
 create_report(dt) # 数据EDA分析报告
 
 # 对数据初步预处理(批量单因素分析变量保留数值型变量)
@@ -617,7 +620,7 @@ for (i in names(train)[c(-1:-7)]) {
 ddist <- datadist(train) # 数据打包
 options(datadist = "ddist")
 # 输出单因素和多因素结果(医学统计与R语言：扔掉多余制表工具，用finalfit吧)
-library(finalfit)
+library(finalfit)        # CRAN v1.0.7
 str(train)
 train["Follow_up_timemon"] <- lapply(train["Follow_up_timemon"], FUN = function(y) {
   as.numeric(y)
@@ -674,7 +677,7 @@ ggsurvplot(fit0,
   plaette = "cyan", data = dt, risk.table = TRUE, surv.median.line = "hv",
   pval = T, xlab = "随访时间(月)", ylab = "无复发概率(%)"
 )
-library(showtext)
+library(showtext)        # CRAN v0.9-6
 showtext_auto(enable = TRUE)
 font_add(family ="YaHei",regular ='msyh.ttc')
 # 绘制累积风险曲线
@@ -692,7 +695,7 @@ ggsurvplot(fit1,
 )
 
 # 批量完成单因素Cox回归分析，变量筛选，多种methods
-library(ezcox)
+library(ezcox)           # CRAN v1.0.4
 str(train)
 ddist <- datadist(train)
 options(datadist = "ddist")
@@ -725,7 +728,7 @@ coxbasemodel <- coxph(
 stepAIC(coxbasemodel, direction = "both", scope = list(lower = . ~ 1, upper = . ~ radscore + Sex + Freq + Durmon))
 
 
-library(My.stepwise)
+library(My.stepwise)     # CRAN v0.1.0 # CRAN v0.1.0
 My.stepwise.coxph(
   Time = "Follow_up_timemon",
   Status = "Rel._in_5yrs",
@@ -733,7 +736,7 @@ My.stepwise.coxph(
   data = train
 )
 
-library(StepReg)
+library(StepReg)         # CRAN v1.4.4
 Surv <- formula("Surv(Follow_up_timemon,Rel._in_5yrs==1) ~ .")
 stepwiseCox(Surv,
   data = train,
@@ -781,7 +784,7 @@ test$lp.clinic <- predict(coxm0, type = "lp")
 test$lp.rad <- predict(coxm1, type = "lp")
 test$lp.rad_clinic <- predict(coxm2, type = "lp")
 
-library(Hmisc)
+library(Hmisc)           # CRAN v5.1-1 # CRAN v5.1-1
 ## Model with clinic(Hmisc::rcorrcens)
 rcorrcens(formula = Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train)
 
@@ -805,9 +808,9 @@ p <- ggforest(model1, fontsize = 1.2,
 p
 topptx(figure = p, filename = "/home/wane/Desktop/EP/sci/cph/forest.pptx")
 # https://mp.weixin.qq.com/s?__biz=MzkxOTM5MzQwNQ==&mid=2247487676&idx=1&sn=a2e234e965848fb556836ef4743543fe&chksm=c1a395aef6d41cb80528a7e3e9e62801dfe60e5a4e8643e600885aa3c7ed4738e20ce85283f1&mpshare=1&scene=1&srcid=1126sRlXXAsRLniUBTJhn5lp&sharer_sharetime=1669517702780&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd
-library(forplo)
+library(forplo)          # CRAN v0.2.5
 DT::datatable(train)
-library(autoReg)
+library(autoReg)         # CRAN v0.3.3 # CRAN v0.3.3
 model <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs==1) ~ brain_hypoxia, data = train[c(6:19,20,21:24)]) 
 autoReg(model,
   uni = T, threshold = 0.1,
@@ -826,8 +829,8 @@ forplo(model,
   shade.col = "#FDF0E0",
   shade.alpha = 0.8
 )
-# [Topic 7. 临床预测模型--Cox回归](https://blog.csdn.net/weixin_41368414/article/details/122452355)
-library(forestmodel)
+                         # [Topic 7. 临床预测模型--Cox回归](https://blog.csdn.net/weixin_41368414/article/details/122452355)
+library(forestmodel)     # CRAN v0.6.2
 forest_model(model,
              theme = theme_forest(),
              factor_separate_line=TRUE
@@ -883,7 +886,7 @@ plot(
 # fun.at 设置生存率的刻度
 # xfrac 设置数值轴与最左边标签的距离，可以调节下数值观察下图片变化情况
 
-library(regplot)
+library(regplot)         # CRAN v1.1
 regplot(model1,
   observation = train[6, ], # 指定某一患者，4即是选择数据集中第四位患者
   interval = "confidence", title = "Nomogram",
@@ -896,7 +899,7 @@ regplot(model1,
   failtime = c(12, 36, 60), prfail = TRUE, droplines = T
 )
 
-library(VRPM)
+library(VRPM)            # not installed on this machine vNA
 fit <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon,
   data = train,
   model = TRUE
@@ -911,11 +914,11 @@ colplot(fit,
 
 # 制作在线交互式动态列线图
 # https://www.bilibili.com/video/BV1Jb4y1h7iw/?spm_id_from=pageDriver
-library(DynNom)
-library(shiny)
-library(plotly)
-library(compare)
-library(stargazer)
+library(DynNom)          # CRAN v5.0.2
+library(shiny)           # CRAN v1.8.0
+library(plotly)          # CRAN v4.10.3
+library(compare)         # CRAN v0.2-6
+library(stargazer)       # CRAN v5.2.3
 
 DynNom(fit, train)
 # covariate = c("slider", "numeric")
@@ -925,7 +928,7 @@ setwd("C:\\Users\\wane1\\Documents\\rdocu\\git\\Epilepsy_BLS_JNU\\EP_Cox_Nomo\\s
 setwd("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\")
 DNbuilder(fit) ## 生成下图文件于工作目录处
 
-library(shinyPredict)
+library(shinyPredict)    # CRAN v0.1.1
 train$Rel._in_5yrs <- factor(train$Rel._in_5yrs)
 
 mod1 <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ SGS + familial_epilepsy + Durmon + SE,
@@ -957,17 +960,17 @@ c_index
 # https://blog.csdn.net/fjsd155/article/details/84669331
 # 独立验证
 # Method 1: rcorr.cens
-library(Hmisc)
+library(Hmisc)           # CRAN v5.1-1 # CRAN v5.1-1
 fit <- cph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ AI_radscore + Lat_radscore + SGS + Durmon, data = train) #  SGS + Durmon
 fp <- predict(fit, test)
 cindex.orig <- 1 - rcorr.cens(fp, Surv(test$Follow_up_timemon, test$Rel._in_5yrs))
 cindex.orig
 # Method 2: survConcordance
-library(survival)
+library(survival)        # CRAN v3.5-7
 c_index <- concordance(Surv(test$Follow_up_timemon, test$Rel._in_5yrs == 1) ~ predict(fit, test))$concordance
 c_index
 # 内部交叉验证或Bootstrap验证
-library(boot)
+library(boot)            # CRAN v1.3-28.1
 
 c_index <- function(formula, data, indices) {
   tran.data <- data[indices, ]
@@ -1044,7 +1047,7 @@ plot(c_index1,
 )
 
 # 绘制Time-dependent ROC curve, Assessment of Discrimination in Survival Analysis (C-statistics, etc), https://rpubs.com/kaz_yos/survival-auc
-library(survivalROC)
+library(survivalROC)     # CRAN v1.0.3.1
 ## Put linear predictors ("lp") into pbc dataset
 test$lp.Radscore_clinic <- predict(full, type = "lp", newdata = test)
 ## Define a function
@@ -1169,7 +1172,7 @@ pk <- Score(
 auc <- plotAUC(pk)
 auc
 # 3.美化，加载两个包
-library(ggprism)
+library(ggprism)         # CRAN v1.0.4 # CRAN v1.0.4
 # 设置配色
 cols <- c("red", "blue", "darkgreen")
 # 画图，注意这里的数据来源是刚刚做好的auc数据
@@ -1301,9 +1304,9 @@ abline(0, 1, lty = 3, lwd = 2, col = "black")
 # 临床决策曲线分析(DCA&CIC)
 # https://blog.csdn.net/dege857/article/details/115061901
 # https://blog.csdn.net/dege857/article/details/119373671?spm=1001.2014.3001.5501
-library(ggDCA)
-library(dcurves)
-library(rmda)
+library(ggDCA)           # not installed on this machine vNA
+library(dcurves)         # CRAN v0.4.0
+library(rmda)            # CRAN v1.6
 
 d_full <- ggDCA::dca(full, full3, full5,
   new.data = test,
@@ -1350,7 +1353,7 @@ fig1 <- ggDCA::dca(f11,
   times = c(12, 36, 40)
 )
 ggplot(fig1)
-library(ggprism)
+library(ggprism)         # CRAN v1.0.4 # CRAN v1.0.4
 ggplot(fig1,
   linetype = F,
   lwd = 1.2
@@ -1402,14 +1405,14 @@ ggplot(fig1, linetype = F, lwd = 1.2) +
   ) +
   labs(title = "3 years DCA")
 
-library(patchwork) # 拼图
+library(patchwork)       # CRAN v1.1.3 # 拼图
 p1 + p2 + p3 + p4 + p5 + p6 + plot_annotation(tag_levels = "A") +   plot_layout(ncol = 3) + plot_layout(guides = "collect") -> p
 p
 ggsave("C:\\Users\\wane1\\Documents\\file\\sci\\cph\\ROC-Cali_DCA.pdf", p, width = 20, height = 9, dpi = 900) # 保存为精度为600 dpi的tiff文件
 
 # riskplot绘制
 # https://cloud.tencent.com/developer/article/1765625
-library(ggrisk)
+library(ggrisk)          # CRAN v1.3
 as.matrix(head(train))
 str(train)
 train$SGS <- ifelse(train$SGS == "No", 0, 1)
@@ -1463,7 +1466,7 @@ ggrisk(fit,
 # wald统计量有些区别(进一步进行anova分析时可以看出区别).cph来自rms包,coxph来自survival包
 
 # NRI计算与绘制
-library(nricens)
+library(nricens)         # CRAN v1.6
 m.old <- coxph(Surv(Follow_up_timemon, Rel._in_5yrs == 1) ~ SGS + familial_epilepsy + Durmon + SE,
   data = train, x = TRUE
 )
@@ -1495,9 +1498,9 @@ nricens(
 )
 # 明确的划分切点适用分类NRI
 # IDI计算与绘制
-library(randomForestSRC)
-library(survey)
-library(survIDINRI)
+library(randomForestSRC) # CRAN v3.2.2
+library(survey)          # CRAN v4.2-1
+library(survIDINRI)      # CRAN v1.1-2 # CRAN v1.1-2
 for (i in names(train)[c(1, 21, 7:18)]) {
   train[, i] <- as.numeric(as.character(train[, i]))
 }
@@ -1516,11 +1519,11 @@ IDI.INF.OUT(x)
 IDI.INF.GRAPH(x)
 
 # 混淆矩阵及F1-score(https://www.geeksforgeeks.org/how-to-calculate-f1-score-in-r/)
-library("caret")
-library(MLmetrics)
+library("caret")         # CRAN vNA
+library(MLmetrics)       # CRAN v1.1.1
 ## Load epicalc package to calcuate AUC
-library(epicalc)
-library(reportROC)
+library(epicalc)         # not installed on this machine vNA
+library(reportROC)       # CRAN v3.6 # CRAN v3.6
 
 ## Model with age and sex
 logit.Rad.cli <- glm(Rel._in_5yrs ~ radscore + SGS + familial_epilepsy + Durmon + SE, data = train, family = binomial)
@@ -1567,7 +1570,7 @@ reportROC(
 
 # 估计回归关系(https://blog.csdn.net/weixin_41368414/article/details/122452355)
 # install.packages("party")
-library(party)
+library(party)           # CRAN v1.3-14
 tree <- ctree(Surv(Follow_up_timemon, Rel._in_5yrs) ~ AI_radscore + Lat_radscore + Durmon + SGS, data = train)
 tree <- ctree(Surv(Follow_up_timemon, Rel._in_5yrs) ~ ., data = train[,5:24])
 plot(tree)
@@ -1575,8 +1578,8 @@ plot(tree)
 # 简易评分系统, WALD-1(变量重要性),
 # https://mp.weixin.qq.com/s?__biz=MzA4MzU2NjUyNA==&mid=2693907244&idx=2&sn=746b13a043f5279739f0fde8ca920f73&chksm=ba91e9ff8de660e95e1685d206bb7acc417da164acf1be2f502c05d45cc14702c7455aae18f9&mpshare=1&scene=1&srcid=0825m2He1JeD6l3aZgTniBJF&sharer_sharetime=1661420090049&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd
 # Total points
-library(rms)
-library(nomogramEx)
+library(rms)             # CRAN v6.7-1
+library(nomogramEx)      # CRAN v3.0
 library(nomogramFormula) # formula_lp函数，计算原始数据中每个患者的总分值和生存概率.
 ddist <- datadist(train)
 options(datadist = "ddist")
@@ -1618,7 +1621,7 @@ hist(dt$novelscore)
 # dt$Rel._in_5yrs <- factor(dt$Rel._in_5yrs)
 dt$Rel._in_5yrs <- as.numeric(as.character(dt$Rel._in_5yrs))
 str(dt)
-library(cutoff)
+library(cutoff)          # CRAN v1.3 # CRAN v1.3
 cox(
   data = dt,
   time = "Follow_up_timemon", y = "Rel._in_5yrs", x = "novelscore",
@@ -1674,7 +1677,7 @@ ggsurvplot(fit,
   xlab = "Follow-up time(months)", ylab = "Cum Relapse(%)"
 )
 
-library(reportROC)
+library(reportROC)       # CRAN v3.6 # CRAN v3.6
 reportROC(gold = dt$Rel._in_5yr, predictor = dt$novelscore, important = "se", plot = TRUE)
 reportROC(gold = res.cat$Rel._in_5yr, predictor.binary = res.cat$novelscore, important = "se", plot = TRUE)
 reportROC(gold = dt$Rel._in_5yr, predictor.binary = binary[1:50], exact = FALSE)
@@ -1712,7 +1715,7 @@ abline(0, 1, lty = 3, lwd = 2, col = "black")
 
 
 # 交叉验证与重抽样, 重复论证
-library(CoxBoost)
+library(CoxBoost)        # not installed on this machine vNA
 str(train)
 train$Rel._in_5yrs <- as.numeric(as.character(train$Rel._in_5yrs))
 train$Rel._in_5yrs <- as.factor(train$Rel._in_5yrs)
@@ -1768,12 +1771,12 @@ cbind(names, coef)
 
 
 ###################################
-## [Accelerated Failure Time (AFT) Model](https://www.youtube.com/watch?v=v1TFklm4OFM&list=PLCj1LhGni3hOON9isnuVYIL8dNwkvwqr9&index=7)
+#                        # [Accelerated Failure Time (AFT) Model](https://www.youtube.com/watch?v=v1TFklm4OFM&list=PLCj1LhGni3hOON9isnuVYIL8dNwkvwqr9&index=7)
 ## Weibull parametrisation
 y <- rweibull(1000, shape = 2, scale = 5)
 survreg(Surv(y) ~ 1, dist = "weibull") # exponential,gaussian,loglogistic,lognormal
 
-library(flexsurv)
+library(flexsurv)        # CRAN v2.2.2
 fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist = "weibull")
 fitg
 plot(fitg)
@@ -1781,6 +1784,6 @@ lines(fitg, col = "blue", lwd.ci = 1, lty.ci = 1)
 # survreg scale parameter maps to 1/shape, linear predictor to log(scale)
 scale(y, center = T, scale = F) # 数据中心化和标准化为了消除量纲对数据结构的影响, scale为真表示数据标准化
 
-library(e1071)
+library(e1071)           # CRAN v1.7-13
 probplot(y, qt)
 
