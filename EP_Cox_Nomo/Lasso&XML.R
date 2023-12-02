@@ -25,112 +25,123 @@ library(writexl)         # CRAN v1.4.2
 # dt <- read.csv("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_AI.csv")
 # dt1 <- read.csv("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_lateral.csv")
 # dt2 <- subset(dt1, dt1$label == 1)
-dt <- readxl::read_xlsx("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_AI.xlsx")
-dt1 <- readxl::read_xlsx("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_lateral.xlsx")
+dt <- readxl::read_xlsx("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_lateral.xlsx")
+dt1 <- readxl::read_xlsx("C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_AI.xlsx")
 # write_xlsx(dt,"C:/Users/wane1/Documents/file/sci/cph/XML/TLE_XML_1130/supplements_trainingset_data_frame_summary/PT_radiomic_features_nor_mask_both_label_234_AI.xlsx")
 
-table(dt$Freq)
 dt <- dt[c(-1:-3)]
-dt <- as.data.frame(dt)
-as.matrix(head(dt))
+dt1 <- dt1[c(-1:-5)]
+# dt <- as.data.frame(dt)
+# as.matrix(head(dt))
+# str(dt) ## 查看每个变量结构
+# summary(dt)
+# corrlate <- cor(as.matrix(dt))
+# corrplot.mixed(corrlate)
+# dt <- na.omit(dt) # 按行删除缺失值
+# attach(dt)
 
-str(dt) ## 查看每个变量结构
-summary(dt)
-corrlate <- cor(as.matrix(dt))
-corrplot.mixed(corrlate)
-dt <- na.omit(dt) # 按行删除缺失值
-attach(dt)
-
+dtx <- as.data.frame(scale(dt[, c(2:1133)]))
+dt <- mutate(dt[, 1], dtx)
 set.seed(123)
 ind <- sample(2, nrow(dt), replace = TRUE, prob = c(0.7, 0.3))
 # 训练集
 train <- dt[ind == 1, ] # the training data set
 # 测试集
 test <- dt[ind == 2, ] # the test data set
-# 待筛选组学特征标准化(Standardization或Normalization)
-dtx <- scale(dt[, c(4:1135)])
-# x=scale(x,center=T,scale=T)  #Z-score标准化方法
-normal_para <- preProcess(x = train[, 4:1135], method = c("center", "scale")) # 提取训练集的标准化参数
-train_normal <- predict(object = normal_para, newdata = train[, 4:1135])
-test_normal <- predict(object = normal_para, newdata = test[, 4:1135])
-train_normal <- mutate(train[, 1:3], train_normal)
-test_normal <- mutate(test[, 1:3], test_normal)
-train1 <- transform(train_normal, Group = "Training")
-test1 <- transform(test_normal, Group = "Test")
-nor <- rbind(train1, test1)
-# 列名数组
-cols <- colnames(nor)
-# 最后一列移到第二列
-n_cols <- c(cols[1], cols[length(cols)], cols[2:(length(cols) - 1)])
-# 最后一列移到第一列
-n_cols <- c(cols[length(cols)], cols[1:(length(cols) - 1)])
-# dataframe排序
-nor1 <- nor[, n_cols]
-write.csv(nor1, "/home/wane/Desktop/EP/Structured_Data/Task2/PT_radiomic_features_temporal_ind2_group.csv", row.names = F)
 
-train <- subset(dt, dt$Group == "Training")
-test <- subset(dt, dt$Group == "Test")
-train1 <- as.data.frame(scale(train[5:1136])) # 自变量Z-score标准化
-test1 <- as.data.frame(scale(test[5:1136]))
-train <- mutate(train[, 3:4], train1)
-test <- mutate(test[, 3:4], test1)
-# library(dplyr)         # CRAN v1.1.3
-train %>%
-  select_if(~ !any(is.na(.))) -> train # 删除全是缺失值的列
-test %>%
-  select_if(~ !any(is.na(.))) -> test # 删除全是缺失值的列
-# 外部验证, 增加数据集
-train <- read.csv("/home/wane/Desktop/EP/sci/cph/cph2/220trainnor.csv")
-train <- train[-1]
-test <- read.csv("/home/wane/Desktop/EP/sci/cph/cph2/89testnor.csv")
-test <- test[-1]
-write.csv(train, file = "C:/Users/wane199/Desktop/EP/Structured_Data/Task2/COX12mon/220trainnor.csv", quote = T, row.names = F)
+# dtx1 <- as.data.frame(scale(dt1[, c(2:1133)]))
+# dt1 <- mutate(dt1[, 1], dtx1)
+set.seed(123)
+ind1 <- sample(2, nrow(dt1), replace = TRUE, prob = c(0.7, 0.3))
+# 训练集
+train1 <- dt1[ind == 1, ] # the training data set
+# 测试集
+test1 <- dt1[ind == 2, ] # the test data set
 
-# 看一下，不要让临床信息差的太多，输出table1
-table(train$Rel._in_5yrs) # 计数
-prop.table(table(train$Follow_up_timemon)) # 计算百分比
-prop.table(table(test$Follow_up_timemon))
-prop.table(table(train$Rel._in_5yrs))
-prop.table(table(test$Rel._in_5yrs))
-
-#                        # [影像组学导论R语言实现冗余性分析/影像组学导论--冗余性分析(pearson OR spearman)](https://mp.weixin.qq.com/s?__biz=MzAwMjIwMTIzNA==&mid=2247484813&idx=1&sn=d43f4897c8be4eac54ca0fa357bed0cc&chksm=9acf4670adb8cf664fbba4a32d13acb196b9c0c95a05b0266389509538596cd067bef8e0dde9&mpshare=1&scene=1&srcid=06062ez3l3xMK1pmRJqIDjzv&sharer_sharetime=1654487807730&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
-# 9.feature selection: reduce redundancy
-# 9.1 calculate p of normality test
-trainx <- train[3:1120]
-dim(trainx)
-# trainx <- train[7:22]
-norm_result <- apply(trainx, 1, function(x) shapiro.test(x)$p.value)
-norm_feature <- trainx[which(norm_result >= 0.05)] # 获取满足正态性特征
-# 9.2 calculate r
-cor_nor <- cor(norm_feature, method = "pearson") # 针对正态特征使用Pearson
-cor_all <- cor(trainx, method = "spearman") # 针对非正态特征使用Spearman
-# 9.3 change matrix
-num_nor <- dim(cor_nor)[1]
-cor_all[1:num_nor, 1:num_nor] <- cor_nor # 将正态部分覆盖所有特征的Spearman结果上
-# 9.4 set 0
-cor_all[upper.tri(cor_all)] <- 0
-diag(cor_all) <- 0 # 上、主对角线值为0
-# 9.5 get training_set after reduce redundancy
-data_reduce <- trainx[, !apply(cor_all, 2, function(x) any(abs(x) > 0.9))] # 将系数大于0.9的特征删除
-# 9.6 check new data
-dim(data_reduce) # 初步降维
-
-# Lasso-LR process
-str(train) # 变量均设置为num数值类型(double)，非factor|character类型
-train[16] <- lapply(train[16], FUN = function(y) {
-  as.numeric(y)
-}) # int类型转num类型
-cv_x <- as.matrix(data_reduce) # 数据矩阵化
-cv_x <- as.matrix(train[3:1134])
+# # 待筛选组学特征标准化(Standardization或Normalization)
+# dtx <- scale(dt[, c(2:1133)])
+# # x=scale(x,center=T,scale=T)  #Z-score标准化方法
+# normal_para <- preProcess(x = train[, 2:1133], method = c("center", "scale")) # 提取训练集的标准化参数
+# train_normal <- predict(object = normal_para, newdata = train[, 2:1133])
+# test_normal <- predict(object = normal_para, newdata = test[, 2:1133])
+# train_normal <- mutate(train[, 1], train_normal)
+# test_normal <- mutate(test[, 1], test_normal)
+# train1 <- transform(train_normal, Group = "Training")
+# test1 <- transform(test_normal, Group = "Test")
+# nor <- rbind(train1, test1)
+# # 列名数组
+# cols <- colnames(nor)
+# # 最后一列移到第二列
+# n_cols <- c(cols[1], cols[length(cols)], cols[2:(length(cols) - 1)])
+# # 最后一列移到第一列
+# n_cols <- c(cols[length(cols)], cols[1:(length(cols) - 1)])
+# # dataframe排序
+# nor1 <- nor[, n_cols]
+# write.csv(nor1, "/home/wane/Desktop/EP/Structured_Data/Task2/PT_radiomic_features_temporal_ind2_group.csv", row.names = F)
+# 
+# train <- subset(dt, dt$Group == "Training")
+# test <- subset(dt, dt$Group == "Test")
+# train1 <- as.data.frame(scale(train[5:1136])) # 自变量Z-score标准化
+# test1 <- as.data.frame(scale(test[5:1136]))
+# train <- mutate(train[, 3:4], train1)
+# test <- mutate(test[, 3:4], test1)
+# # library(dplyr)         # CRAN v1.1.3
+# train %>%
+#   select_if(~ !any(is.na(.))) -> train # 删除全是缺失值的列
+# test %>%
+#   select_if(~ !any(is.na(.))) -> test # 删除全是缺失值的列
+# # 外部验证, 增加数据集
+# train <- read.csv("/home/wane/Desktop/EP/sci/cph/cph2/220trainnor.csv")
+# train <- train[-1]
+# test <- read.csv("/home/wane/Desktop/EP/sci/cph/cph2/89testnor.csv")
+# test <- test[-1]
+# write.csv(train, file = "C:/Users/wane199/Desktop/EP/Structured_Data/Task2/COX12mon/220trainnor.csv", quote = T, row.names = F)
+# 
+# # 看一下，不要让临床信息差的太多，输出table1
+# table(train$Rel._in_5yrs) # 计数
+# prop.table(table(train$Follow_up_timemon)) # 计算百分比
+# prop.table(table(test$Follow_up_timemon))
+# prop.table(table(train$Rel._in_5yrs))
+# prop.table(table(test$Rel._in_5yrs))
+# 
+# # [影像组学导论R语言实现冗余性分析/影像组学导论--冗余性分析(pearson OR spearman)](https://mp.weixin.qq.com/s?__biz=MzAwMjIwMTIzNA==&mid=2247484813&idx=1&sn=d43f4897c8be4eac54ca0fa357bed0cc&chksm=9acf4670adb8cf664fbba4a32d13acb196b9c0c95a05b0266389509538596cd067bef8e0dde9&mpshare=1&scene=1&srcid=06062ez3l3xMK1pmRJqIDjzv&sharer_sharetime=1654487807730&sharer_shareid=13c9050caaa8b93ff320bbf2c743f00b#rd)
+# # 9.feature selection: reduce redundancy
+# # 9.1 calculate p of normality test
+# trainx <- train[2:1133]
+# dim(trainx)
+# # trainx <- train[7:22]
+# norm_result <- apply(trainx, 1, function(x) shapiro.test(x)$p.value)
+# norm_feature <- trainx[which(norm_result >= 0.05)] # 获取满足正态性特征
+# # 9.2 calculate r
+# cor_nor <- cor(norm_feature, method = "pearson") # 针对正态特征使用Pearson
+# cor_all <- cor(trainx, method = "spearman") # 针对非正态特征使用Spearman
+# # 9.3 change matrix
+# num_nor <- dim(cor_nor)[1]
+# cor_all[1:num_nor, 1:num_nor] <- cor_nor # 将正态部分覆盖所有特征的Spearman结果上
+# # 9.4 set 0
+# cor_all[upper.tri(cor_all)] <- 0
+# diag(cor_all) <- 0 # 上、主对角线值为0
+# # 9.5 get training_set after reduce redundancy
+# data_reduce <- trainx[, !apply(cor_all, 2, function(x) any(abs(x) > 0.9))] # 将系数大于0.9的特征删除
+# # 9.6 check new data
+# dim(data_reduce) # 初步降维
+# 
+# # Lasso-LR process
+# str(train) # 变量均设置为num数值类型(double)，非factor|character类型
+# train[16] <- lapply(train[16], FUN = function(y) {
+#   as.numeric(y)
+# }) # int类型转num类型
+# cv_x <- as.matrix(data_reduce) # 数据矩阵化
+cv_x <- as.matrix(train[2:1133])
 # cv_y <- train[1:2]
-cv_y <- data.matrix(Surv(train$Follow_up_timemon, train$Rel._in_5yrs))
+cv_y <- data.matrix(train[1])
 set.seed(123)
 # tow pictures for lasso
 nocv_lasso <- glmnet(
   x = cv_x, y = cv_y,
-  family = "cox", alpha = 1,
+  family = "binomial", alpha = 1,
 )
-par(font.lab = 2, mfrow = c(2, 1), mar = c(4.5, 5, 3, 2))
+par(font.lab = 4, mfrow = c(2, 2), mar = c(4.5, 5, 3, 2))
 ## 设置画图参数: mar 以数值向量表示的边界大小，顺序为“下、左、上、右”，单位为英分*。默认值为c(5, 4, 4, 2) + 0.1 ,mgp 设定标题、坐标轴名称、坐标轴距图形边框的距离。默认值为c(3,1,0)，其中第一个值影响的是标题
 ## cex.axis 坐标轴刻度放大倍数,cex.main 标题的放大倍数,legend.x，legend.y 图例位置的横坐标和纵坐标,legend.cex 图例文字大小
 # layout(matrix(c(1,2,3,3),2,2,byrow=F))
@@ -140,13 +151,37 @@ abline(v = log(nocv_lasso$lambda.min), lwd = 1, lty = 3, col = "black")
 
 lasso_selection <- cv.glmnet(
   x = cv_x,
-  y = cv_y, type.measure = "deviance", # 评价指标deviance
-  family = "cox", alpha = 1, nfolds = 1000
+  y = cv_y, type.measure = "auc", # 评价指标auc、deviance、mse、class
+  family = "binomial", alpha = 1, nfolds = 100
 ) # cross validation
-fitcv1 <- cv.glmnet(cv_x, cv_y, alpha = 1, family = "cox", type.measure = "C")
-fitcv1
+fitcv <- cv.glmnet(cv_x, cv_y, alpha = 1, family = "binomial") # , type.measure = "C"
+fitcv
 lasso_selection
 plot(x = lasso_selection, las = 1, xlab = "log(lambda)") # Fig2
+plot(x = fitcv, las = 1, xlab = "log(lambda)") # Fig2
+
+cv_x1 <- as.matrix(train1[2:1133])
+# cv_y <- train[1:2]
+cv_y1 <- data.matrix(train1[1])
+set.seed(123)
+# tow pictures for lasso
+nocv_lasso1 <- glmnet(
+  x = cv_x1, y = cv_y1,
+  family = "binomial", alpha = 1,
+)
+p3 <- plot(nocv_lasso1, xvar = "lambda", las = 1, lwd = 2, xlab = "log(lambda)") # Fig1
+abline(v = log(nocv_lasso1$lambda.min), lwd = 1, lty = 3, col = "black")
+
+lasso_selection1 <- cv.glmnet(
+  x = cv_x1,
+  y = cv_y1, type.measure = "auc", # 评价指标auc、deviance、mse、class
+  family = "binomial", alpha = 1, nfolds = 1000
+) # cross validation
+fitcv1 <- cv.glmnet(cv_x1, cv_y1, alpha = 1, family = "binomial") # , type.measure = "C"
+fitcv1
+lasso_selection1
+plot(x = lasso_selection1, las = 1, xlab = "log(lambda)") # Fig2
+plot(x = fitcv1, las = 1, xlab = "log(lambda)") # Fig2
 # 给每一副子图加上序号，tag_level选a，表示用小写字母来标注
 library(cowplot)         # CRAN v1.1.1
 plot_grid(p1, p2, labels = c("a", "b"))
