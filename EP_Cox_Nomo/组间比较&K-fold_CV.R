@@ -94,9 +94,13 @@ data1 %>%
   group_by(Model) %>% 
   t_test(value ~ ., detailed = TRUE)
 
-dt %>% t.test(AUC_12 ~ Model, paired=T)
+shapiro.test(dt$AUC_12) #p＞0.05才符合正态分布
+shapiro.test(dt$AUC_36) #p＞0.05才符合正态分布
 
-t.test(dt$AUC_12 ~ dt$Model,paired=T,alternative="two.sided",conf.level=0.95)
+var.test(dt$AUC_12)
+
+t.test(dt$AUC_12 ~ dt$Model,paired=T,var.equal = T,
+       alternative="two.sided",conf.level=0.95)
 
 
 ##### 绘制多分组图 #####
