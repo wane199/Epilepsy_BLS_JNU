@@ -41,7 +41,8 @@ dt_1 <- dt %>%
   group_by(Rel._in_5yrs) %>%
   psych::describe()
 
-# (组间比较)[https://www.jianshu.com/p/0a662230caff]
+##### 组间比较 #####
+# [https://www.jianshu.com/p/0a662230caff]
 # (R语言ggpubr绘制小提琴图（violin plot）)[https://zhuanlan.zhihu.com/p/588764115]
 
 library(ggpubr) # 用于统计分析添加统计指标
@@ -86,8 +87,19 @@ p2 <- ggviolin(data1, x = "Model", # x轴还是surstat状态
 p2 <- p2 + stat_compare_means(method = "t.test", label = "p.format",
                             label.x.npc ="left", size = 5) 
 p2
-##############
-# 绘制多分组图
+
+###### 批量做T检验,输出统计量 ######
+library(rstatix)   
+data1 %>% 
+  group_by(Model) %>% 
+  t_test(value ~ ., detailed = TRUE)
+
+dt %>% t.test(AUC_12 ~ Model, paired=T)
+
+t.test(dt$AUC_12 ~ dt$Model,paired=T,alternative="two.sided",conf.level=0.95)
+
+
+##### 绘制多分组图 #####
 dt <- dplyr::filter(dt, !grepl('ResNet模型', Model)) # 使用dplyr包的filter函数筛选dataframe数据中不包含特定字符串的数据行（not contains）
 head(dt)
 dt <- dt[,-2]
