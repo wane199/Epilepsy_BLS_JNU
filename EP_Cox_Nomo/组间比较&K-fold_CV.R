@@ -70,8 +70,8 @@ p3 <- ggviolin(dt, x = "Model", y = "AUC_36",
 # p1 | p2 | p3
 
 library(reshape2) # 转换长矩阵需要这个包
-dt <- dplyr::filter(dt, grepl('T1_临床特征', Dataset)) # 使用dplyr包的filter函数筛选dataframe数据中不包含特定字符串的数据行（not contains）
-dt <- subset(dt, dt$Dataset == "T1_临床特征")
+dt <- dplyr::filter(dt, grepl('PET_临床特征', Dataset)) # 使用dplyr包的filter函数筛选dataframe数据中不包含特定字符串的数据行（not contains）
+dt <- subset(dt, dt$Dataset == "PET_临床特征")
 dt <- dt[-1]
 data1 <- melt(dt, id.vars = "Model") #以surstat为参照列转换成长矩阵
 p2 <- ggviolin(data1, x = "Model", # x轴还是surstat状态
@@ -99,7 +99,7 @@ shapiro.test(dt$AUC_36) #p＞0.05才符合正态分布
 
 var.test(dt$AUC_12)
 
-t.test(dt$AUC_12 ~ dt$Model,paired=T,var.equal = T,
+t.test(dt$Brier_36 ~ dt$Model,paired=F,var.equal = T,
        alternative="two.sided",conf.level=0.95)
 
 
