@@ -29,13 +29,32 @@ str(dt)
 options(digits = 3)
 tapply(dt$Follow_up_timemon, dt$Rel._in_5yrs, shapiro.test)
 # 统计量W接近于1，但是P值小于0.05，所以我们有足够理由拒绝其符合正态分布。
-
 wilcox.test(Follow_up_timemon ~ Rel._in_5yrs, data = dt)
 res <- psych::describeBy(Follow_up_timemon ~ Rel._in_5yrs, data = dt)
 round(psych::describe(dt), 4)
 res
 
+###### 数据是否服从正态分布？######
+# p值小于显着性水平0.05，说明两组数据的分布与正态分布有显着差异。数据分布不符合正态分布的假设检验成立。
+with(dt, shapiro.test(Durmon[Rel._in_5yrs == "0"]))
+with(dt, shapiro.test(Durmon[Rel._in_5yrs == "1"]))
+###### 数据是否符合方差齐性？######
+# F检验p值大于显着性水平alpha = 0.05。因此，两组数据的方差之间没有显著差异。因此认为两组方差相等（方差齐性）。
+res.ftest <- var.test(Durmon ~ Rel._in_5yrs, data = dt)
+res.ftest
+###### 计算两独立样本Wilcoxon检验 ######
+res <- wilcox.test(Durmon ~ Rel._in_5yrs, data = dt, var.equal = TRUE)
+res
 
+###### 多个变量进行卡方检验循环 ######
+# 根据复发状态分组变量，用map函数实现
+FUN<- function(x){chisq.test(dt[,"Rel._in_5yrs"],x ,correct = TRUE)}
+library(purrr)
+map(dt[,c(10,11,15:24)],FUN)
+#检验是否正确
+chisq.test(dt$side,dt$Rel._in_5yrs,correct = TRUE)
+
+# 探索性描述
 library(dplyr)
 dt_1 <- dt %>%
   group_by(Rel._in_5yrs) %>%
