@@ -40,11 +40,20 @@ with(dt, shapiro.test(Durmon[Rel._in_5yrs == "0"]))
 with(dt, shapiro.test(Durmon[Rel._in_5yrs == "1"]))
 ###### 数据是否符合方差齐性？######
 # F检验p值大于显着性水平alpha = 0.05。因此，两组数据的方差之间没有显著差异。因此认为两组方差相等（方差齐性）。
-res.ftest <- var.test(Durmon ~ Rel._in_5yrs, data = dt)
+res.ftest <- var.test(Onsetmon ~ Rel._in_5yrs, data = dt)
 res.ftest
 ###### 计算两独立样本Wilcoxon检验 ######
-res <- wilcox.test(Durmon ~ Rel._in_5yrs, data = dt, var.equal = TRUE)
+res <- wilcox.test(Follow_up_timemon ~ Rel._in_5yrs, data = dt, var.equal = TRUE)
 res
+
+####### 输出Wilcoxon检验U值和Z值 #######
+Za = qnorm(res$p.value/2)
+Za
+
+ra = abs(Za)/sqrt(220*2)
+names(ra) = "ra"
+ra
+
 
 ###### 多个变量进行卡方检验循环 ######
 # 根据复发状态分组变量，用map函数实现
@@ -59,7 +68,9 @@ library(dplyr)
 dt_1 <- dt %>%
   group_by(Rel._in_5yrs) %>%
   psych::describe()
-
+relap <- subset(dt, dt$Rel._in_5yrs == "1")
+relap %>%
+  summary()
 ##### 组间比较 #####
 # [https://www.jianshu.com/p/0a662230caff]
 # (R语言ggpubr绘制小提琴图（violin plot）)[https://zhuanlan.zhihu.com/p/588764115]
