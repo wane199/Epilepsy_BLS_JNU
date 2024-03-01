@@ -43,16 +43,17 @@ with(dt, shapiro.test(Durmon[Rel._in_5yrs == "1"]))
 res.ftest <- var.test(Onsetmon ~ Rel._in_5yrs, data = dt)
 res.ftest
 ###### 计算两独立样本Wilcoxon检验 ######
-res <- wilcox.test(Follow_up_timemon ~ Rel._in_5yrs, data = dt, var.equal = TRUE)
+res <- wilcox.test(Surgmon ~ Rel._in_5yrs, data = dt, var.equal = TRUE)
 res
 
 ####### 输出Wilcoxon检验U值和Z值 #######
+# https://stats.stackexchange.com/questions/330129/how-to-get-the-z-score-in-wilcox-test-in-r
 Za = qnorm(res$p.value/2)
 Za
 
 ra = abs(Za)/sqrt(220*2)
 names(ra) = "ra"
-ra
+ra # r is sometimes calculated as an effect size for the Mann-Whitney test.
 
 
 ###### 多个变量进行卡方检验循环 ######
