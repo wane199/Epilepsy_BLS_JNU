@@ -72,10 +72,10 @@ dt_1 <- dt %>%
 relap <- subset(dt, dt$Rel._in_5yrs == "1")
 relap %>%
   summary()
+
 ##### 组间比较 #####
 # [https://www.jianshu.com/p/0a662230caff]
 # (R语言ggpubr绘制小提琴图（violin plot）)[https://zhuanlan.zhihu.com/p/588764115]
-
 library(ggpubr) # 用于统计分析添加统计指标
 library(patchwork)
 options(digits = 3) # 设定三位小数
@@ -419,9 +419,51 @@ ggplot(res1, aes(x = Sample, y = value, fill = Sample)) +
   theme_prism(border = T) +
   theme(legend.position = "none")
 
+##### 多个ML算法的K折交叉结果的统计检验 #####
+# https://www.jianshu.com/p/e5ba9c4f84d9
+library(ggpubr)
+dt <- read.csv("C:/Users/wane1/Documents/file/sci/cph/ML/ML_TLE_1122/review_0222/11ML_10fold_0.csv",sep = "\t")
+dim(dt)
+str(dt)
+
+# Edit from here
+x <- which(names(dt) == "Algorithm") # name of grouping variable
+y <- which(names(dt) == "Accuracy" # names of variables to test
+           | names(dt) == "AUC"
+           | names(dt) == "Recall"
+           | names(dt) == "Prec."
+           | names(dt) == "F1"
+           | names(dt) == "Kappa"           
+           | names(dt) == "MCC"
+           | names(dt) == "APC"
+           )
+method1 <- "anova" # one of "anova" or "kruskal.test"
+method2 <- "t.test" # one of "wilcox.test" or "t.test"
+my_comparisons <- list(c("LR", "NB"), c("LR", "LDA"), c("LR", "RF"), c("LR", "ET"), c("LR", "GBC"),
+                       c("LR", "LBM"), c("LR", "KNN"),c("LR", "ADA"), c("LR", "QDA"),c("LR", "DT")
+                       ) # comparisons for post-hoc tests
+# Edit until here
+# Edit at your own risk
+for (i in y) {
+  for (j in x) {
+    p <- ggboxplot(dt,
+                   x = colnames(dt[j]), y = colnames(dt[i]),
+                   color = colnames(dt[j]),
+                   legend = "none",
+                   palette = "npg",
+                   add = "jitter"
+    )
+    print(
+      p + stat_compare_means(aes(label = paste0(..method.., ", p-value = ", ..p.format..)),
+                             method = method1, label.y = max(dt[, i], na.rm = TRUE)
+      )
+      + stat_compare_means(comparisons = my_comparisons, method = method2, label = "p.format") # remove if p-value of ANOVA or Kruskal-Wallis test >= alpha
+    )
+  }
+}
 
 ########################################
-# 生存分析任务转化为分类任务
+##### 生存分析任务转化为分类任务 #####
 rm(list = ls())
 library(survival)
 library(rms)
